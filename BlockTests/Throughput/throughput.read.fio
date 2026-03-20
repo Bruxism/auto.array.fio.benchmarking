@@ -1,14 +1,14 @@
 [global]
-bs=4K
-iodepth=1
+bs=256K
+iodepth=64
 direct=1
 ioengine=libaio
 group_reporting
 time_based
 runtime=120
-numjobs=1
-name=rwlatency-test-job
-rw=randrw
+numjobs=4
+name=raw-read
+rw=read
 							
 [job1]
-filename=$testlocation
+filename=${testlocation}

@@ -1,28 +1,44 @@
 #!/bin/bash
 
-#fio test suite
-
+# fio test suite
 
 set -euo pipefail
+shopt -s globstar nullglob
 
-#Array variable 'DRIVES'
+# Check script location 
+## This directory will be used in reference to the fio test files
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+
+# Array variable 'DRIVES'
 DRIVES=(/dev/sd[a-m])
-#Variable for current date and time in custom format
-DATE_TIME=$(date +%Y.%m.%d-%H:%M-UTC)
 
-#Function for listing drive information and saving it
+# Initialize block device test file locations
+BLOCK_DEVICE_TESTS=($SCRIPT_DIR/BlockTests/**/*.fio)
+
+# Set results directory by time
+RESULTS_DIR="fio.results-$(date +%Y.%m.%d-%H:%M-UTC)"
+
+# Function for listing drive information and saving it
 list_drives () {
-local filename="drive_info-$DATE_TIME.txt"
-echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN" > $filename
-lsblk -o PATH,SIZE,MODEL,SERIAL,WWN ${drives[@]} | tee -a $filename
+# Variable for current date and time in custom format
+local filename="$RESULTS_DIR/drive_info.txt"
+echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN" | tee $filename
+echo "" | tee -a $filename
+lsblk -o PATH,SIZE,MODEL,SERIAL,WWN ${DRIVES[@]} | tee -a $filename
 }
 
-#Function for running fio tests
-#`--output` is used for the output log file
-##It doesn't appear to have a jobfile equivalent option
-##It's not the same as the `filename` option for fio which is for where to make the test files
+# Function for running fio tests
+# `--output` is used for the output log file
+## It doesn't appear to have a jobfile equivalent option
+## It's not the same as the `filename` option for fio
+##   which is for where to make the test files
 fio_tests () {
 for drive in DRIVES; do
-
+	local serial="$(lsblk -no SERIAL $drive)"
+	local drive_results_dir="$RESULTS_DIR/$serial"
+	mkdir -p "$drive_results_dir"
+	for test in BLOCK_DEVICE_TESTS; do
+		fio --ramp_time=30s --output="$drive_results_dir/
+	done
 done
 }

@@ -7,8 +7,8 @@ group_reporting
 time_based
 runtime=120
 numjobs=4
-name=raw-read
+name=IOPS-raw-read
 rw=read
 							
 [job1]
-filename=$testlocation
+filename=${testlocation}
