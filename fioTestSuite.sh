@@ -46,8 +46,7 @@ for drive in "${DRIVES[@]}"; do
 		testlocation=$drive \
 		fio \
 		--ramp_time=30s \
-		--output="$drive_results_dir/$test_name.txt" --output-format=normal \
-		--output="$drive_results_dir/$test_name.json" --output-format=json \
+		--output="$drive_results_dir/$test_name.txt" --output-format=normal,json \
 		$test
 	done
 done
