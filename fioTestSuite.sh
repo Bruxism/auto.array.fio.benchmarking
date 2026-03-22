@@ -24,7 +24,6 @@ echo "Results Directory: $RESULTS_DIR"
 
 # Function for listing drive information and saving it
 list_drives () {
-# Variable for current date and time in custom format
 local filename="$RESULTS_DIR/drive_info.txt"
 echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN" | tee $filename
 echo "" | tee -a $filename
