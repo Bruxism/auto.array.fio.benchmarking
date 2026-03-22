@@ -19,7 +19,7 @@ BLOCK_DEVICE_TESTS=($SCRIPT_DIR/BlockTests/**/*.fio)
 echo "Tests initialized: ${BLOCK_DEVICE_TESTS[@]}"
 
 # Set results directory by time
-RESULTS_DIR="fio.results-$(date +%Y.%m.%d-%H:%M-UTC)"
+RESULTS_DIR="fio.results-$(date +%Y.%m.%d-%H.%M-UTC)"
 echo "Results Directory: $RESULTS_DIR"
 
 # Function for listing drive information and saving it
