@@ -21,9 +21,13 @@ shopt -s globstar nullglob
 # 	)
 
 declare -A ZPOOL_LAYOUTS=(
- 		[SSD_4RAID10]="mirror sda sdb mirror sdc sdd"
 		[SSD_4STRIPE]="sda sdb sdc sdd"
+ 		[SSD_2X2RAID10]="mirror sda sdb mirror sdc sdd"
+		[SSD_4RAIDZ1]="raidz1 sda sdb sdc sdd"
 		[HDD_8STRIPE]="sde sdf sdg sdh sdi sdj sdk sdl"
+		[HDD_2X4RAID10]="mirror sde sdf mirror sdg sdh mirror sdi sdj mirror sdk sdl"
+		[HDD_2MIRROR]="sde sdf"
+		[HDD_8RAIDZ2]="raidz2 sde sdf sdg sdh sdi sdj sdk sdl"
 )
 
 
@@ -86,13 +90,13 @@ echo "Initialized 1M tests: ${FIO_TESTS_1M[*]}"
 
 # List and save drive info
 list_drives() {
-local filename="${BASE_RESULTS_DIR}/drive_info.txt"
+local filename="${BASE_RESULTS_DIR}"/drive_info.txt
 
 	{
-	echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN"
+	echo "lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN"
 	echo ""
-	lsblk -o PATH,SIZE,MODEL,SERIAL,WWN ${DRIVES[@]}
-	} | tee -a "${filename}"
+	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN ${DRIVES[@]}
+	} | tee "${filename}"
 }
 
 # The following two functions 
@@ -211,22 +215,22 @@ done
 ##				END FUNCTIONS				##
 ##############################################
 
+mkdir -p "${BASE_RESULTS_DIR}"
 
 collect_unique_drives
 echo "Drive array initialized: ${DRIVES[@]}"
 echo "Location of script: ${SCRIPT_DIR}"
-echo "Tests initialized: ${BLOCK_DEVICE_TESTS[@]}"
+echo "Tests initialized: ${FIO_TESTS[@]}"
 echo "Results Directory: ${BASE_RESULTS_DIR}"
 
 list_drives
 categorize_tests
 
-mkdir -p "${BASE_RESULTS_DIR}"
-
 for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
 	zpool_name="${zpool,,}"
 	zpool_layout="${ZPOOL_LAYOUTS[${zpool}]}"
-	echo "zpool name: ${zpool_name} zpool layout: ${zpool_layout}"
+	echo "zpool name: ${zpool_name}"
+	echo "zpool layout: ${zpool_layout}"
 	clear_zfs_fs
 	block_discard
 	zpool_results_dir="${BASE_RESULTS_DIR}"/"${zpool_name}"
