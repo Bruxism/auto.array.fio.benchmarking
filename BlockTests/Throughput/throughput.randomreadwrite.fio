@@ -1,13 +1,13 @@
 [global]
-bs=256K
-iodepth=64
-direct=1
+bs=32M
+iodepth=4
+end_fsync=1
 ioengine=libaio
 group_reporting
 time_based
 runtime=120
-numjobs=4
-name=raw-randreadwrite
+numjobs=8
+name=throughput-randreadwrite
 rw=randrw
 							
 [job1]

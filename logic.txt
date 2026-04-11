@@ -1,0 +1,54 @@
+Variables created by user:
+	Pools - string
+		Named with a particular prefix to allow a function to collect and iterate
+		use WWN for the disks (ideally) -- else sd[a-z] is fine
+		Manually created by user
+	All tested disks - array
+
+Immutable variables:
+	Where the script is running - string
+	
+	
+Functions:
+	Collect all pool variables to be made into an array variable
+		using WWN id
+	Collect all tests into an array relative to script location
+		Split them between 4k and 1M tests -- each into their own array variable
+
+	Print/save info about disks
+		lsblk
+		smart
+
+	Export all zpools
+		
+	`blkdiscard` all drives
+	
+	`wipefs` all drives
+	
+	Create ZFS pool(s)
+		Create ZFS datasets
+			4k
+			1MB
+	Print/save info about ZFS
+		pool(s)
+		datasets
+
+
+
+
+
+Simple:
+User defines pools in associative array with keys that are descriptive to pool 
+	e.g. 	declare -A ZPOOL_LAYOUTS=([SSD_4STRIPE]="sda sdb sdc sdd")
+For each defined pool
+	Clear drives with
+		zpool export -a
+		wipefs -af 
+		blkdiscard
+	Create zfs pools
+		-o ashift=12 -o autotrim=on 
+	Create 4k/1MB datasets per pool
+		-o atime=off -o compression=lz4 -o xattr=sa -o recordsize=4k
+		-o atime=off -o compression=lz4 -o xattr=sa -o recordsize=1M
+	Run 4k and 1MB tests accordingly to dataset and collect the results
+		Results are collected in subdirectories labeled by ZPOOL_LAYOUTS keys

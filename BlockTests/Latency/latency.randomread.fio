@@ -1,14 +1,14 @@
 [global]
 bs=4K
 iodepth=1
-direct=1
+end_fsync=1
 ioengine=libaio
 group_reporting
 time_based
 runtime=120
 numjobs=1
-name=latency-read-test-job
+name=latency-read
 rw=randread
-							
+
 [job1]
 filename=${testlocation}
