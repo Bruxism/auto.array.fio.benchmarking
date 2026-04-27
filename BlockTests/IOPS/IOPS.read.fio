@@ -2,10 +2,10 @@
 bs=4K
 iodepth=512
 end_fsync=1
-ioengine=libaio
+ioengine=io_uring
 group_reporting
 time_based
-runtime=120
+runtime=60
 numjobs=4
 name=IOPS-read
 rw=read

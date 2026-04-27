@@ -1,12 +1,12 @@
 [global]
-bs=32M
-iodepth=4
+bs=1M
+iodepth=8
 end_fsync=1
-ioengine=libaio
+ioengine=io_uring
 group_reporting
 time_based
-runtime=120
-numjobs=8
+runtime=60
+numjobs=1
 name=throughput-randread
 rw=randread
 							
