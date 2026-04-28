@@ -47,7 +47,7 @@ for drive in "${DRIVES_RAW[@]}"; do
 		fio \
 		--ramp_time=30s \
 		--output="${drive_results_dir}/${test_name}.txt" --output-format=normal,json \
-		${test}
+		"${test}"
 	done
 done
 }
