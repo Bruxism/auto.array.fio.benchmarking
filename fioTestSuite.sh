@@ -25,7 +25,7 @@ list_drives () {
 local filename="${RESULTS_DIR}/drive_info.txt"
 
 	{
-	echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN"
+	echo "lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN"
 	echo ""
 	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN "${DRIVES_RAW[@]}"
 	} | tee "${filename}"
