@@ -8,7 +8,7 @@ shopt -s globstar nullglob
 
 
 # Drives to be tested
-DRIVES=(/dev/sd[a-m])
+DRIVES_RAW=(/dev/sd[a-m])
 
 # Check script location 
 ## This directory will be used in reference to the fio test files
@@ -27,8 +27,8 @@ local filename="${RESULTS_DIR}/drive_info.txt"
 	{
 	echo "lsblk -o PATH,SIZE,MODEL,SERIAL,WWN"
 	echo ""
-	lsblk -o PATH,SIZE,MODEL,SERIAL,WWN ${DRIVES[@]}
-	} | tee -a "${filename}"
+	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN "${DRIVES_RAW[@]}"
+	} | tee "${filename}"
 }
 
 # Function for running fio tests
@@ -36,8 +36,8 @@ local filename="${RESULTS_DIR}/drive_info.txt"
 ## It doesn't appear to have a jobfile equivalent option
 ## It's not the same as the `filename` option for fio
 ##   which is for where to make the test files
-fio_tests () {
-for drive in "${DRIVES[@]}"; do
+fio_raw_tests () {
+for drive in "${DRIVES_RAW[@]}"; do
 	local serial="$(lsblk -no SERIAL $drive)"
 	local drive_results_dir="${RESULTS_DIR}/${serial}"
 	mkdir -p "${drive_results_dir}"
@@ -55,10 +55,10 @@ done
 main () {
 echo "Location of script: ${SCRIPT_DIR}"
 echo "Tests initialized: ${BLOCK_DEVICE_TESTS[@]}"
-mkdir ${RESULTS_DIR}
+mkdir "${RESULTS_DIR}"
 echo "Results Directory: ${RESULTS_DIR}"
 list_drives
-fio_tests
+fio_raw_tests
 }
 
 main
