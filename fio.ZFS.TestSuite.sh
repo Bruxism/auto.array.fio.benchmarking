@@ -204,20 +204,22 @@ done
 }
 
 echo_tests() {
-echo "Running test with:"
-echo -e "\tPool: ${zpool_name}"
-echo -e "\tLayout ${zpool_layout}"
-echo -e "\tEngine: ${ioengine}"
+	echo "Running test with:"
+	echo -e "\tPool: ${zpool_name}"
+	echo -e "\tLayout ${zpool_layout}"
+	echo -e "\tEngine: ${ioengine}"
 }
 
 fio_test() {
-echo_tests
-test_name="$(basename -s .fio ${test})"
-fio \
---ioengine="${ioengine}" \
---size=20GB \
---output="${zpool_results_dir}/${test_name}-${ioengine}.txt" --output-format=normal,json \
-"${test}"
+	echo_tests
+	test_name="$(basename -s .fio ${test})"
+	
+	fio \
+		--ioengine="${ioengine}" \
+		--size=20GB \
+		--output="${zpool_results_dir}/${test_name}-${ioengine}.txt" \
+		--output-format=normal,json \
+		"${test}"
 }
 
 ##############################################
