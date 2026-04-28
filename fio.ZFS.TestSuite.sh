@@ -177,7 +177,7 @@ local filename="${zpool_results_dir}/zfs_info.txt"
 	} | tee "${filename}"
 }
 
-# Function for running fio tests
+# Function logic for running fio tests
 # `--output` is used for the output log file
 ## It doesn't appear to have a jobfile equivalent option
 ## It's not the same as the `filename` option for fio
@@ -185,31 +185,40 @@ local filename="${zpool_results_dir}/zfs_info.txt"
 fio_zfs_tests() {
 local zpool_name="$1"
 local zpool_results_dir="$2"
+
 local test
+local test_name
+local testlocation
+local ioengines=("io_uring" "libaio")
 
-echo "Running tests under ${zpool_name} ${zpool_layout}"
-
-for test in "${FIO_TESTS_4k[@]}"; do
-	local test_name="$(basename -s .fio ${test})"
-
-	testlocation=/"${zpool_name}"/4k/testfile \
-	fio \
-	--size=20GB \
-	--output="${zpool_results_dir}/${test_name}.txt" --output-format=normal,json \
-	"${test}"
-done
-for test in "${FIO_TESTS_1M[@]}"; do
-	local test_name="$(basename -s .fio ${test})"
-
-	testlocation=/"${zpool_name}"/1M/testfile \
-	fio \
-	--size=20GB \
-	--output="${zpool_results_dir}/${test_name}.txt" --output-format=normal,json \
-	"${test}"
+for ioengine in "${ioengines[@]}"; do
+	for test in "${FIO_TESTS_4k[@]}"; do
+		testlocation=/"${zpool_name}"/4k/testfile \
+		fio_test
+	done
+	for test in "${FIO_TESTS_1M[@]}"; do
+		testlocation=/"${zpool_name}"/1M/testfile \
+		fio_test
+	done
 done
 }
 
+echo_tests() {
+echo "Running test with:"
+echo -e "\tPool: ${zpool_name}"
+echo -e "\tLayout ${zpool_layout}"
+echo -e "\tEngine: ${ioengine}"
+}
 
+fio_test() {
+echo_tests
+test_name="$(basename -s .fio ${test})"
+fio \
+--ioengine="${ioengine}" \
+--size=20GB \
+--output="${zpool_results_dir}/${test_name}-${ioengine}.txt" --output-format=normal,json \
+"${test}"
+}
 
 ##############################################
 ##				END FUNCTIONS				##

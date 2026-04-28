@@ -2,7 +2,6 @@
 bs=4K
 iodepth=1
 end_fsync=1
-ioengine=io_uring
 group_reporting
 time_based
 runtime=60
