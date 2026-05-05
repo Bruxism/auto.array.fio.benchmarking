@@ -15,7 +15,7 @@ DRIVES_RAW=(/dev/sd[a-m])
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 # Initialize block device test file locations
-BLOCK_DEVICE_TESTS=(${SCRIPT_DIR}/BlockTests/**/*.fio)
+BLOCK_DEVICE_TESTS=("${SCRIPT_DIR}"/BlockTests/**/*.fio)
 
 # Set results directory by time
 RESULTS_DIR="fio.results-$(date +%Y.%m.%d-%H.%M-UTC)"
