@@ -135,7 +135,7 @@ done
 clear_zfs_fs() {
 zpool export -a || true
 wipefs -af "${DRIVES[@]}"
-echo "All zpool exported and filesystem wiped from drive array"
+echo "All zpool exported and filesystem wiped from script-configured drives"
 }
 
 # TRIM or UNMAP SSD
