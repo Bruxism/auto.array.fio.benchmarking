@@ -250,3 +250,22 @@ for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
 	list_zfs "${zpool_results_dir}"
 	fio_zfs_tests "${zpool_name}" "${zpool_results_dir}"
 done
+
+
+
+
+
+#TODO
+#Add cache-wipe between runs
+#Add a variable or function for checking how much free RAM there is and
+#	scale how much the test amount is to account for a realistic amount
+#	of cache hits (~80% cache hits so size is ~120% of free RAM)
+#	Or use random_distribution=
+#Add specification of mix 80/20 read/write
+#	rwmixread=
+#
+#
+#
+
+
+
