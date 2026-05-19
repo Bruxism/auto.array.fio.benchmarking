@@ -6,8 +6,8 @@ RESULTS_DIR="/root/Results/"
 
 
 BLOCKSIZES=(4kb 8kb 16kb 64kb 128kb 1M 32M)
-IODEPTHS=(1 4 8 16 32 64 128 512)
-NUMJOBS=(1 4 8 16 32 64 128 512)
+IODEPTHS=(1 2 4 8 16 32 64 128)
+NUMJOBS=(1 2 4 8 16 32 64 128)
 TEST_TYPES=(read write trim randread randwrite readwrite randrw)
 IOENGINES=(libaio io_uring psync)
 SIZES=(50G)
@@ -44,24 +44,24 @@ zpool create \
 }
 
 zfs_create_dataset() {
-local recordsize="$1"
-local checksum="$2"
-local compression="$4"
-local primarycache="$5"
+# Depends on zfs_resolve_direct()
+local recordsize="${blocksize}"
+local checksum="${checksum}"
+local primarycache="${primarycache}"
 
 zfs create \
 -o recordsize="${recordsize}" \
 -o checksum="${checksum}" \
 -o logbias=latency \
 -o checksum="${checksum}" \
--o compression="${compression}" \
+-o compression=lz4 \
 -o primarycache="${primarycache}" \
 -o xattr=sa \
 -o atime=off \
-"${ZPOOL_NAME}"/"${blocksize}"
+"${ZPOOL_NAME}"/"${recordsize}"
 }
 
-zfs_clear_testpool() {
+zfs_clear_testpool_datasets() {
 zfs destroy -r "${ZPOOL_NAME}"
 }
 
@@ -91,7 +91,7 @@ output_name+=".$(timestamp)"
 }
 
 fio_function() {
-local disk_config #TODO add function for this
+#local disk_config #TODO add function for this
 
 local name
 local direct
@@ -142,7 +142,7 @@ case "${test_type}" in
 		rwmixread=80
 	;;
 	*)
-		unset rwmixread
+		unset rwmixread #Used for fio_output_name()
 	;;
 esac
 
@@ -172,6 +172,7 @@ wipefs -af /dev/"${DRIVE}"
 test_matrix() {
 local blocksize
 local iodepth
+local iodepth_i
 local test_type
 local size
 local numjobs
@@ -179,23 +180,29 @@ local direct
 local use_pareto
 
 for blocksize in "${BLOCKSIZES[@]}"; do
-	for direct in 0 1; do
+for direct in 0 1; do
+	# Iterate through IODEPTHS and at the same time,
+	# 	iterate in the reverse of NUMJOBS.
+	# 	They should have the same set of numbers for simplicity.
+	for ((iodepth_i=0; iodepth_i<"${#IODEPTHS[@]}"; iodepth_i++)); do
+		iodepth="${IODEPTHS[iodepth_i]}"
+		numjobs="${NUMJOBS[-1-iodepth_i]}"
 		
-		for iodepth in "${IODEPTHS[@]}"; do
 		for ioengine in "${IOENGINES[@]}"; do
 		for test_type in "${TEST_TYPES[@]}"; do
 		for size in "${SIZES[@]}"; do
-		for numjobs in "${NUMJOBS[@]}"; do
 		for runtime in "${RUNTIMES[@]}"; do
 		for use_pareto in 0 1; do
-		done
-		done
+
+
+
 		done
 		done
 		done
 		done
 		done
 	done
+done
 done
 }
 
@@ -283,6 +290,8 @@ fio \
 
 
 zfs_resolve_direct() {
+# Depends on test_matrix()
+# Depended by zfs_create_dataset()
 local direct
 local checksum
 local primarycache
@@ -299,49 +308,63 @@ case "${direct}" in
 esac
 }
 
-zfs_resolve_logbias() {
-local blocksize
-local test_blocksize
-local blocksize_demarcation
-local test_blocksize_demarcation
-
-
-test_blocksize=$(numfmt --from=iec "${blocksize}")
-
-if [[ "${test_blocksize}" in
-	
-esac
-}
 
 
 
-
-
-
-check_fs() {
+matrix_fs_case() {
 case "${fs}" in
 	zfs)
-		zfs_clear_testpool
-		zfs_create_dataset \
-			"${blocksize}" \
-			"${checksum}" \
-			"${logbias}" \
-			"${compression}" \
-			"${primarycache}" 
-	;;	
+		check_zfs_testfile
+	;;
+	ext4)
+		#TODO
+	;;
 esac
 }
 
 
 
+prepare_zfs_testfile() {
+# Depends on: 
+#	zfs_resolve_direct
+#	zfs_create_dataset
+# Depended by:
+#	check_zfs_testfile
+local testfile
+
+zfs_resolve_direct
+zfs_create_dataset
+testfile=/"${ZPOOL_NAME}"/"${recordsize}"/testfile
+}
+
+check_zfs_testfile() {
+# Depends on:
+# 	zfs_clear_testpool_datasets
+#	prepare_zfs_testfile
+# Depended by:
+#	matrix_fs_case
+local direct_previous
+
+# If testfile exists in the intended zfs blocksize/recordsize, and
+# 	direct hasn't changed, then continue to use the same dataset/testfile
+if [[ -a /"${ZPOOL_NAME}"/"${blocksize}"/testfile ]] && \
+	[[ -n "${direct_previous}" ]] && \
+	(( "${direct_previous}" == "${direct}" ))
+then
+	echo 3 > /proc/sys/vm/drop_caches
+	direct_previous="${direct}"
+	sleep 10
+else 
+	zfs_clear_testpool_datasets
+	sleep 2
+	prepare_zfs_testfile
+fi
+}
 
 
+test_matrix_logic() {
 
-
-
-
-
-
+}
 
 
 
