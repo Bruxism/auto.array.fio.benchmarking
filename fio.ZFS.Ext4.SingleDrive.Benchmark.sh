@@ -317,13 +317,13 @@ testfile=/"${zpool_name}"/"${recordsize}"/testfile
 mkdir -p "${RESULTS_DIR}"
 
 # Clear any existing filesystems from previous tests
-zpool_destroy /dev/"${DRIVE}" "${ZPOOL_NAME}"
+zpool_destroy "${DRIVE}" "${ZPOOL_NAME}"
 delete_ext4
 
 # Start ZFS testing
 zpool_create 9 "${ZPOOL_NAME}" "${DRIVE}"
 test_matrix
-zpool_destroy /dev/"${DRIVE}" "${ZPOOL_NAME}"
+zpool_destroy "${DRIVE}" "${ZPOOL_NAME}"
 
 # Start ext4 testing
 make_ext4
