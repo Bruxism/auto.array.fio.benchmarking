@@ -4,11 +4,10 @@ DRIVE=nvme0n1
 ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results/"
 
-
 BLOCKSIZES=(4kb 8kb 16kb 64kb 128kb 1M 32M)
 IODEPTHS=(1 2 4 8 16 32 64 128)
 NUMJOBS=(1 2 4 8 16 32 64 128)
-TEST_TYPES=(read write trim randread randwrite readwrite randrw)
+TEST_TYPES=(read write randread randwrite readwrite randrw)
 IOENGINES=(libaio io_uring psync)
 SIZES=(50G)
 RUNTIMES=(600)
@@ -34,7 +33,7 @@ local ashift="$1"
 local zpool_name="$2"
 local drive="$3"
 
-fs=zfs
+fs=ZFS
 zpool create \
 -o ashift="${ashift}" \
 -o autotrim=on \
@@ -45,38 +44,52 @@ zpool create \
 
 zfs_create_dataset() {
 # Depends on zfs_resolve_direct()
-local recordsize="${blocksize}"
 local checksum="${checksum}"
 local primarycache="${primarycache}"
+local zpool_name="${ZPOOL_NAME}"
+
+recordsize="${blocksize}"
 
 zfs create \
 -o recordsize="${recordsize}" \
--o checksum="${checksum}" \
 -o logbias=latency \
 -o checksum="${checksum}" \
 -o compression=lz4 \
 -o primarycache="${primarycache}" \
 -o xattr=sa \
 -o atime=off \
-"${ZPOOL_NAME}"/"${recordsize}"
+"${zpool_name}"/"${recordsize}"
 }
 
 zfs_clear_testpool_datasets() {
-zfs destroy -r "${ZPOOL_NAME}"
-}
+local zpool_name="${ZPOOL_NAME}"
 
-zfs_resolve_profile() {
-local direct
-local checksum
-local primarycache
-
-zfs_resolve_direct	
-
-
-
+zfs destroy -r "${zpool_name}"
 }
 
 fio_output_name() {
+unset extra_info
+
+case "${fs}" in
+	ZFS)
+		# TODO needs work for automation of varying configurations
+		#	It would probably be something set up at the top of the script
+		#	where disk configurations are declared to be iterated over for
+		#	testing.
+		disk_config="${DRIVE}"."${fs}"0.rs-"${recordsize}"
+	;;
+	ext4)
+		disk_config="${DRIVE}"."${fs}"
+	;;
+esac
+
+if [[ -n mem_align ]]; then
+	extra_info+=".mem_align-${mem_align}"
+fi
+if [[ "${use_pareto}" == "1" ]]; then
+	extra_info+=".pareto-.8"
+fi
+
 output_name="${RESULTS_DIR}"
 output_name+="${disk_config}"
 output_name+=".direct-${direct}"
@@ -86,30 +99,32 @@ output_name+="${rwmixread:+.rwmixread-${rwmixread}}"
 output_name+=".bs-${bs}"
 output_name+=".iodepth-${iodepth}"
 output_name+=".numjobs-${numjobs}"
-output_name+="${extra_info:+.${extra_info}}"
+output_name+=".size-${size}"
+output_name+="${extra_info:+${extra_info}}"
 output_name+=".$(timestamp)"
 }
 
 fio_function() {
 #local disk_config #TODO add function for this
 
-local name
-local direct
-local testfile
-local blocksize
-local iodepth
-local ioengine
-local test_type
-local size
-local numjobs
-local gtod_reduce
+#local name
+#local direct
+#local testfile
+#local blocksize
+#local iodepth
+#local ioengine
+#local test_type
+#local size
+#local numjobs
+#local gtod_reduce
+#local runtime
+#local output_name
+
 local mem_align=512b
-local runtime
-local output_name
 
-local rwmixread
+#local rwmixread
 
-local use_pareto
+#local use_pareto
 
 local args=(
 	--filename="${testfile}"
@@ -142,13 +157,15 @@ case "${test_type}" in
 		rwmixread=80
 	;;
 	*)
-		unset rwmixread #Used for fio_output_name()
+		unset rwmixread # Used for fio_output_name()
 	;;
 esac
 
 fio_output_name
 args+=(--output="${output_name}".log)
-args+=(--name="${output_name}")
+args+=(--name="fiotest")
+
+echo "${args[@]}"
 
 fio "${args[@]}"
 }
@@ -159,7 +176,9 @@ fs=ext4
 
 parted --script /dev/"${DRIVE}" mklabel gpt mkpart "" ext4 0% 100%
 mkfs.ext4 -F /dev/"${DRIVE}"p1 -E lazy_itable_init=0,lazy_journal_init=0
+mkdir -p /mnt/"${DRIVE}"
 mount -o noatime,nodiratime /dev/"${DRIVE}"p1 /mnt/"${DRIVE}"
+testfile=/mnt/"${DRIVE}"/testfile
 }
 
 delete_ext4() {
@@ -167,6 +186,9 @@ unset fs
 
 umount /mnt/"${DRIVE}"
 wipefs -af /dev/"${DRIVE}"
+sleep 1
+blkdiscard -f /dev/"${DRIVE}"
+sleep 1
 }
 
 test_matrix() {
@@ -186,115 +208,45 @@ for direct in 0 1; do
 	# 	They should have the same set of numbers for simplicity.
 	for ((iodepth_i=0; iodepth_i<"${#IODEPTHS[@]}"; iodepth_i++)); do
 		iodepth="${IODEPTHS[iodepth_i]}"
-		numjobs="${NUMJOBS[-1-iodepth_i]}"
-		
+		numjobs="${NUMJOBS[-1-iodepth_i]}"		
 		for ioengine in "${IOENGINES[@]}"; do
-		for test_type in "${TEST_TYPES[@]}"; do
-		for size in "${SIZES[@]}"; do
-		for runtime in "${RUNTIMES[@]}"; do
-		for use_pareto in 0 1; do
-
-
-
-		done
-		done
-		done
-		done
+			# If ioengine is psync, then iodepth is set to 1 by fio
+			#	on the backend anyway. It also means that it's testing for
+			# 	latency so it needs gtod_reduce to be off to record them.
+			# This is really just for the fio_output_name function.
+			# If any other test is on, then latency is probably going
+			#	to be blasted by IOPS or bandwidth for measuring those, and
+			#	turning it off means getting closer to maximizing performance
+			#	for those metrics.
+			if [[ "${ioengine}" == psync ]]; then
+				iodepth=1
+				gtod_reduce=0
+			else
+				gtod_reduce=1
+			fi
+			for test_type in "${TEST_TYPES[@]}"; do
+			for size in "${SIZES[@]}"; do
+			for runtime in "${RUNTIMES[@]}"; do
+			for use_pareto in 0 1; do
+				matrix_fs_case
+				fio_function
+			done
+			done
+			done
+			done
 		done
 	done
 done
 done
 }
 
-
-
-mkdir -p "${RESULTS_DIR}"
-
-zpool_destroy
-delete_ext4
-
-zpool_create 9 "${ZPOOL_NAME}" "${DRIVE}"
-
-
-
-
-
-
-
-
-
-
-
-
-#disk_config=8HDDdiskRAID0.64K-Strip
-#disk_config=8HDDdiskZFS0
-disk_config=8HDDdiskRAID0.64K-Strip.ext4
-
-testfile=/mnt/sde/testfile
-#testfile=/testdrive/64k/testfile
-
-bs=64k
-iodepth=1
-numjobs=512
-ioengine=libaio
-direct=0
-test_type=randrw
-rwmixread=80
-
-name="${test_type}"
-
-#extra_info="size-50G"
-extra_info="size-50G.pareto-.8"
-
-#extra_info="cache-all.checksum-on"
-#extra_info="pdcache-on.wt.nora.cache-off"
-extra_info="pdcache-off.wb.ra.cache-on"
-
-output_name="${RESULTS_DIR}"
-output_name+="${disk_config}"
-output_name+=".${test_type}"
-output_name+="${rwmixread:+.rwmixread-${rwmixread}}"
-output_name+=".${ioengine}"
-output_name+=".bs-${bs}.iodepth-${iodepth}"
-output_name+=".numjobs-${numjobs}"
-output_name+=".direct-${direct}"
-output_name+="${extra_info:+.${extra_info}}"
-output_name+=".$(timestamp).txt"
-
-
-fio \
---name="${name}" \
---filename="${testfile}" \
---bs="${bs}" \
---iodepth="${iodepth}" \
---ioengine="${ioengine}" \
---rw="${test_type}" \
---rwmixread="${rwmixread}" \
---size=50G \
---numjobs="${numjobs}" \
---gtod_reduce=1 \
---time_based \
---mem_align=512b \
---group_reporting \
---end_fsync=1 \
---direct="${direct}" \
---output-format=normal,json \
---output="${output_name}" \
---runtime=600 \
---norandommap=1 \
---random_distribution=pareto:0.8
-
-
-
-
-
-
 zfs_resolve_direct() {
 # Depends on test_matrix()
 # Depended by zfs_create_dataset()
-local direct
-local checksum
-local primarycache
+
+#local direct
+#local checksum
+#local primarycache
 
 case "${direct}" in
 	1)
@@ -308,13 +260,12 @@ case "${direct}" in
 esac
 }
 
-
-
-
 matrix_fs_case() {
+# Depends on ${fs} being set such as by
+#	zpool_create
 case "${fs}" in
-	zfs)
-		check_zfs_testfile
+	ZFS)
+		setup_zfs_testfile
 	;;
 	ext4)
 		#TODO
@@ -322,78 +273,58 @@ case "${fs}" in
 esac
 }
 
+setup_zfs_testfile() {
+# Depends on:
+# 	zfs_clear_testpool_datasets
+#	prepare_zfs_testfile_dataset
+# Depended by:
+#	matrix_fs_case
 
+#local previous_direct
 
-prepare_zfs_testfile() {
+local zpool_name="${ZPOOL_NAME}"
+
+# If testfile exists in the intended zfs blocksize/recordsize, and
+# 	direct hasn't changed, then continue to use the same dataset/testfile
+#	after clearing cache/ARC and giving a little time for it to clear out
+if [[ -a /"${zpool_name}"/"${blocksize}"/testfile ]] && \
+	[[ -n "${previous_direct}" ]] && \
+	(( "${previous_direct}" == "${direct}" ))
+then
+	echo 3 > /proc/sys/vm/drop_caches
+	previous_direct="${direct}"
+	sleep 10
+else 
+	zfs_clear_testpool_datasets
+	prepare_zfs_testfile_dataset
+fi
+}
+
+prepare_zfs_testfile_dataset() {
 # Depends on: 
 #	zfs_resolve_direct
 #	zfs_create_dataset
 # Depended by:
-#	check_zfs_testfile
-local testfile
+#	setup_zfs_testfile
+local zpool_name="${ZPOOL_NAME}"
 
 zfs_resolve_direct
 zfs_create_dataset
-testfile=/"${ZPOOL_NAME}"/"${recordsize}"/testfile
-}
-
-check_zfs_testfile() {
-# Depends on:
-# 	zfs_clear_testpool_datasets
-#	prepare_zfs_testfile
-# Depended by:
-#	matrix_fs_case
-local direct_previous
-
-# If testfile exists in the intended zfs blocksize/recordsize, and
-# 	direct hasn't changed, then continue to use the same dataset/testfile
-if [[ -a /"${ZPOOL_NAME}"/"${blocksize}"/testfile ]] && \
-	[[ -n "${direct_previous}" ]] && \
-	(( "${direct_previous}" == "${direct}" ))
-then
-	echo 3 > /proc/sys/vm/drop_caches
-	direct_previous="${direct}"
-	sleep 10
-else 
-	zfs_clear_testpool_datasets
-	sleep 2
-	prepare_zfs_testfile
-fi
+testfile=/"${zpool_name}"/"${recordsize}"/testfile
 }
 
 
-test_matrix_logic() {
+mkdir -p "${RESULTS_DIR}"
 
-}
+# Clear any existing filesystems from previous tests
+zpool_destroy /dev/"${DRIVE}" "${ZPOOL_NAME}"
+delete_ext4
 
+# Start ZFS testing
+zpool_create 9 "${ZPOOL_NAME}" "${DRIVE}"
+test_matrix
+zpool_destroy /dev/"${DRIVE}" "${ZPOOL_NAME}"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Start ext4 testing
+make_ext4
+test_matrix
