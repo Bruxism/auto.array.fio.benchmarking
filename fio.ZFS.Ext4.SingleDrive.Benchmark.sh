@@ -268,7 +268,8 @@ case "${fs}" in
 		setup_zfs_testfile
 	;;
 	ext4)
-		#TODO
+		echo 3 > /proc/sys/vm/drop_caches
+		sleep 10
 	;;
 esac
 }
