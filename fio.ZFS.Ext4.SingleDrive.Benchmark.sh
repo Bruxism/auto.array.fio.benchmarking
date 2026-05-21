@@ -291,10 +291,10 @@ if [[ -a /"${zpool_name}"/"${blocksize}"/testfile ]] && \
 	[[ -n "${previous_direct}" ]] && \
 	(( "${previous_direct}" == "${direct}" ))
 then
-	echo 3 > /proc/sys/vm/drop_caches
-	previous_direct="${direct}"
-	sleep 10
 	echo "Dataset recreation unnecessary. Leaving it in place, and reusing it."
+	previous_direct="${direct}"
+	echo 3 > /proc/sys/vm/drop_caches
+	sleep 10
 else
 	echo "Dataset recreation necessary. Recreating before next test."
 	previous_direct="${direct}"
