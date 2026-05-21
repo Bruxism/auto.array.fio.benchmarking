@@ -4,13 +4,13 @@ DRIVE=nvme0n1
 ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results/"
 
-BLOCKSIZES=(4kb 8kb 16kb 64kb 128kb 1M 32M)
-IODEPTHS=(1 2 4 8 16 32 64 128)
-NUMJOBS=(1 2 4 8 16 32 64 128)
+BLOCKSIZES=(4kb 8kb 64kb 128kb 1M 32M)
+IODEPTHS=(1 4 16 64)
+NUMJOBS=(1 4 16 64)
 TEST_TYPES=(read write randread randwrite readwrite randrw)
 IOENGINES=(libaio io_uring psync)
 SIZES=(50G)
-RUNTIMES=(600)
+RUNTIMES=(300)
 
 timestamp() {
 TZ='America/Chicago' \
