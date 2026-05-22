@@ -1,0 +1,30 @@
+Even when aggressively pared down, fio.ZFS.Ext4.SingleDrive.Benchmark.sh grew
+to 288 tests per disk configuration. That's far too much. Even without
+accounting for the 10s cache flush, that amounted to 24 hours.
+
+That's within the realm of practicality, but it stretches it, and
+it struck me still as rather inefficient.
+
+There were six test types (read write randread randwrite readwrite randrw),
+and three ioengines (libaio io_uring psync).
+
+I'm thinking about writing fio test files that have some variables, but may
+otherwise remain static for purpose testing (bandwidth, IOPS, latency).
+
+Still, there is some benefit to the exhaustive testing via matrix, if only
+to compare limitations of each kind of testing. For example, in manual testing,
+I found that ZFS didn't with with varying libaio iodepths.
+
+
+bandwidth
+	
+
+IOPS
+	libaio
+		iodepth doesn't seem to work with ZFS
+	io_uring
+	
+	
+
+Latency
+	psync only
