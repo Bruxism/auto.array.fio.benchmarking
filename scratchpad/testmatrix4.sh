@@ -1,3 +1,5 @@
+#!/bin/bash
+
 fio_profile_bandwidth() {
 blocksizes=(8kb 16kb 1MB)
 numjobs=(1 64 128 256)
@@ -64,8 +66,31 @@ for profile in "${fio_profile_[@]}"; do
 done
 }
 
-collect_blocksizes
-declare -p combined_blocksizes
+test_matrix_zfs() {
+for blocksize in "${combined_blocksizes[@]}"; do
+	zfs_create_dataset
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
