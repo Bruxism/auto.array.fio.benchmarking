@@ -1,4 +1,4 @@
-#!/bin/bash\
+#!/bin/bash
 
 BLOCKSIZES=(4kb 16kb 1M 32M)
 IODEPTHS=(1 4 64)
