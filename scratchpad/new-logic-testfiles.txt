@@ -16,15 +16,33 @@ to compare limitations of each kind of testing. For example, in manual testing,
 I found that ZFS didn't with with varying libaio iodepths.
 
 
-bandwidth
+Bandwidth
+	bs 8kb 16kb 1MB
+	numjobs 1 64 128 256
+	iodepth 1 64 128 256
+	libaio io_uring
+	read write
 	
+	direct 0 1
+		1
+			pareto .8
 
 IOPS
-	libaio
-		iodepth doesn't seem to work with ZFS
-	io_uring
-	
-	
+	bs 4kb 8kb 16kb
+	numjobs 1 64 128 256
+	libaio io_uring
+	iodepth doesn't seem to work with ZFS + libaio
+	read write randread randrw
+		rwmixread 80
+
+	direct 0 1
+		1
+			pareto .8
 
 Latency
+	bs 4kb
+	numjobs 1
+	iodepth 1
+	direct 1
 	psync only
+	randread randrw
