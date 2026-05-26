@@ -16,7 +16,7 @@ zpool destroy testdrive
 wipefs -af /dev/"${drive}"
 blkdiscard -f /dev/"${drive}"
 mkdir -p /mnt/${drive}
-testlocation4k=/mnt/"${drive}"
+testlocation=/mnt/"${drive}"
 parted --script /dev/"${drive}" mklabel gpt mkpart "" ext4 0% 100%
 mkfs.ext4 -F /dev/"${drive}" -E lazy_itable_init=0,lazy_journal_init=0
 mount -o noatime,nodiratime /dev/"${drive}" /mnt/"${drive}"
