@@ -25,10 +25,10 @@ test_types=(randread randrw)
 directs=1
 }
 
-collect_fio_profile_() {
+collect_fio_profile() {
 unset fio_profiles
 local profile
-declare -ag fio_profile_
+declare -ag fio_profiles
 
 echo "fio profiles:"
 for profile in $(compgen -A function fio_profile_); do
@@ -43,7 +43,7 @@ local blocksize
 local profile
 declare -Ag combined_blocksizes
 
-collect_fio_profile_
+collect_fio_profile
 for profile in "${fio_profiles[@]}"; do
 	export -f "${profile}"
 done
