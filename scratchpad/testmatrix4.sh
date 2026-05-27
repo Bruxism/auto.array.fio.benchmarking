@@ -27,7 +27,7 @@ test_types=(randread randrw)
 directs=1
 }
 
-collect_fio_profile() {
+collect_fio_profiles() {
 unset fio_profiles
 local profile
 declare -ag fio_profiles
@@ -45,7 +45,7 @@ local blocksize
 local profile
 declare -Ag combined_blocksizes
 
-collect_fio_profile
+collect_fio_profiles
 for profile in "${fio_profiles[@]}"; do
 	export -f "${profile}"
 done
@@ -67,8 +67,11 @@ done
 }
 
 test_matrix_zfs() {
+for profile in 
 for blocksize in "${combined_blocksizes[@]}"; do
 	zfs_create_dataset
+	for direct in 0 1
+done
 }
 
 
