@@ -2,8 +2,8 @@
 
 fio_profile_bandwidth() {
 blocksizes=(8kb 16kb 1MB)
-numjobs=(1 64 128 256)
-iodepths=(1 64 128 256)
+numjobs=(2 4 64 128)
+iodepths=(2 4 64 128)
 ioengines=(libaio io_uring)
 test_types=(read write)
 directs=(0 1)
@@ -11,8 +11,8 @@ directs=(0 1)
 
 fio_profile_iops() {
 blocksizes=(4kb 8kb 16kb)
-numjobs=(1 64 128 256)
-iodepths=(1 64 128 256)
+numjobs=(2 4 64 128)
+iodepths=(2 4 64 128)
 ioengines=(libaio io_uring)
 test_types=(read write randread randrw)
 directs=(0 1)
@@ -67,10 +67,20 @@ done
 }
 
 test_matrix_zfs() {
-for profile in 
-for blocksize in "${combined_blocksizes[@]}"; do
-	zfs_create_dataset
-	for direct in 0 1
+for blocksize in "${!combined_blocksizes[@]}"; do
+for profile in "${fio_profiles[@]}"; do
+	"${profile}"
+	[[ " ${blocksizes[@]} " =~ " ${blocksize} " ]] || continue
+	for direct in "${directs[@]}"; do
+		zfs_resolve_direct
+		zfs_create_dataset
+			for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
+				iodepth="${iodepths[iodepth_i]}"
+				numjobs="${NUMJOBS[-1-iodepth_i]}"
+				for ioengine in "${IOENGINES[@]}"; do
+			done
+		done
+	done
 done
 }
 
