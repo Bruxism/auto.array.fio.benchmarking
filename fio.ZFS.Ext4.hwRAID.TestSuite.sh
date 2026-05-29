@@ -216,9 +216,6 @@ done
 
 fio_function() {
 #local disk_config #TODO add function for this
-
-local mem_align=512b
-
 local args=(
 	--filename="${testfile}"
 	--bs="${blocksize}"
@@ -230,7 +227,7 @@ local args=(
 	--gtod_reduce="${gtod_reduce}"
 	--group_reporting
 	--time_based
-	--mem_align="${mem_align}"
+	--mem_align="${mem_align:-512b}"
 	--end_fsync=1
 	--direct="${direct}"
 	--runtime="${runtime}"
