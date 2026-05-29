@@ -23,3 +23,11 @@ declare -a wwn8disk
 for wwn in "${WWN_HDD_8DISK[@]}"; do
 	wwn8disk+=("/dev/disk/by-id/wwn-${wwn}")
 done
+
+#Ideally, this would have a variable in place of v0,
+#  so that it could be used as part of a larger
+#  automation.
+get_hwraid_wwn() {
+p /c0/v0 show all |
+sed -n 's/SCSI NAA Id = \(.*\)/\1/p'
+}
