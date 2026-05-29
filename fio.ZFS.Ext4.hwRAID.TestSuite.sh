@@ -216,6 +216,7 @@ done
 
 fio_function() {
 #local disk_config #TODO add function for this
+local arg
 local args=(
 	--filename="${testfile}"
 	--bs="${blocksize}"
@@ -255,7 +256,9 @@ fio_output_name
 args+=(--output="${output_name}".log)
 args+=(--name="fiotest")
 
-echo "${args[@]}"
+for arg in "${args[@]}"; do
+	echo "${arg}"
+done
 
 fio "${args[@]}"
 }
