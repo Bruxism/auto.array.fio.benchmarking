@@ -31,3 +31,18 @@ get_hwraid_wwn() {
 p /c0/v0 show all |
 sed -n 's/SCSI NAA Id = \(.*\)/\1/p'
 }
+
+raid_clear_arrays() {
+p /c0/vall delete
+}
+
+raid_make_array() {
+	p /c0 add vd \
+	r"${raid_number}" \
+	name=8diskRAID0 \
+	drives=32:"${hwraid_disk_slots}" \
+	pdcache="${pdcache}" \
+	"${writeback}"	\
+	"${readahead}" \
+	"${cachedirect}"
+}
