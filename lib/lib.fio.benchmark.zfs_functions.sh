@@ -54,6 +54,26 @@ local zpool_name="${ZPOOL_NAME}"
 zfs destroy -r "${zpool_name}"
 }
 
+zfs_resolve_direct() {
+# Depends on test_matrix()
+# Depended by zfs_create_dataset()
+
+#local direct
+#local checksum
+#local primarycache
+
+case "${direct}" in
+	1)
+		checksum=off
+		primarycache=metadata
+	;;
+	0)
+		checksum=on
+		primarycache=all
+	;;
+esac
+}
+
 test_matrix_zfs() {
 for blocksize in "${!combined_blocksizes[@]}"; do
 for profile in "${fio_profiles[@]}"; do
