@@ -7,10 +7,10 @@ alias p='/opt/MegaRAID/perccli/perccli64'
 # Example config declaration:
 # First section is RAID number, and the following list is the slots used
 #
-# declare -A HWRAID_LAYOUTS=(
-#	[HDD8diskRAID0]="0 9,11,13,15,17,19,21,23"
-#	[SSD4diskRAID0]="0 0,2,4,7"
-# )
+ declare -A HWRAID_LAYOUTS=(
+	[HDD8diskRAID0]="0 9,11,13,15,17,19,21,23"
+	[SSD4diskRAID0]="0 0,2,4,7"
+ )
 
 hwraid_activate_disks() {
 p /c0/e32/s"${hwraid_all_slots_used}" set good force
@@ -26,7 +26,7 @@ for hwraid_array in "${HWRAID_LAYOUTS[@]}"; do
 	some_slots="$(echo ${hwraid_array} | cut -d' ' -f2)"
 	IFS=, read -r -a some_slots_array <<< "${some_slots}"
 	for some_slot in "${some_slots_array[@]}"; do
-		declare -Ag hwraid_slots_used_array["${some_slot}"]=1
+		declare -A hwraid_slots_used_array["${some_slot}"]=1
 	done
 done
 declare -g hwraid_all_slots_used=\
@@ -91,13 +91,13 @@ hwraid_test_matrix() {
 local iodepth_i
 
 for direct in 1 0; do
-	if [[ -n "${testdisk_wwn_basename}" ]]; do
-		delete_ext4
+	if [[ -n "${testdisk_wwn_basename}" ]]; then
+		ext4_delete
 		p /c0/v0 delete 
-	done
+	fi
 	hwraid_resolve_direct
 	hwraid_add_virtual_disk
-	make_ext4
+	ext4_make
 	for profile in "${fio_profiles[@]}"; do
 		"${profile}"
 		# Skip psync when direct=0 since psync doesn't have direct=0
@@ -129,7 +129,7 @@ done
 }
 
 hwraid_cleanup() {
-delete_ext4
+ext4_delete
 hwraid_clear_virtual_disks
 p /c0/e32/s"${hwraid_all_slots_used}" set jbod
 }
@@ -143,5 +143,5 @@ sed -n 's/SCSI NAA Id = \(.*\)/\1/p'
 }
 
 hwraid_clear_virtual_disks() {
-p /c0/vall delete
+p /c0/vall delete force
 }
