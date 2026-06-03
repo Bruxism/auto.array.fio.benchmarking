@@ -5,21 +5,19 @@
 #######################################
 
 make_ext4() {
-fs=ext4
-
-parted --script /dev/"${DRIVE}" mklabel gpt mkpart "" ext4 0% 100%
-mkfs.ext4 -F /dev/"${DRIVE}"p1 -E lazy_itable_init=0,lazy_journal_init=0
-mkdir -p /mnt/"${DRIVE}"
-mount -o noatime,nodiratime /dev/"${DRIVE}"p1 /mnt/"${DRIVE}"
-testfile=/mnt/"${DRIVE}"/testfile
+parted --script /dev/disk/by-id/"${disk}" mklabel gpt mkpart "" ext4 0% 100%
+sleep 1
+mkfs.ext4 -F /dev/disk/by-id/"${disk}"-part1 -E lazy_itable_init=0,lazy_journal_init=0
+sleep 1
+mkdir -p /mnt/"${disk}"
+mount -o noatime,nodiratime /dev/disk/by-id/"${disk}"-part1 /mnt/"${disk}"
+testfile=/mnt/"${disk}"/testfile
 }
 
 delete_ext4() {
-unset fs
-
-umount /mnt/"${DRIVE}"
-wipefs -af /dev/"${DRIVE}"
+umount /mnt/"${disk}"
+wipefs -af /dev/disk/by-id/"${disk}"
 sleep 1
-blkdiscard -f /dev/"${DRIVE}"
+blkdiscard -f /dev/disk/by-id/"${disk}" 2> /dev/disk/by-id/null
 sleep 1
 }
