@@ -3,11 +3,14 @@
 #set location of MegaRAID perccli
 alias p='/opt/MegaRAID/perccli/perccli64'
 
+
+# Example config declaration:
 # First section is RAID number, and the following list is the slots used
-declare -A HWRAID_LAYOUTS=(
-	[HDD8diskRAID0]="0 9,11,13,15,17,19,21,23"
-	[SSD4diskRAID0]="0 0,2,4,7"
-)
+#
+# declare -A HWRAID_LAYOUTS=(
+#	[HDD8diskRAID0]="0 9,11,13,15,17,19,21,23"
+#	[SSD4diskRAID0]="0 0,2,4,7"
+# )
 
 hwraid_activate_disks() {
 p /c0/e32/s"${hwraid_all_slots_used}" set good force
@@ -48,6 +51,15 @@ esac
 }
 
 hwraid_disk_matrix() {
+local testdisk_wwn_basename
+local testdisk_by_id
+local test_partition
+local test_mountdir
+local testfile
+local disk_config
+local hwraid_array raid_number hwraid_disk_slots
+local pdcache writeback readahead cachedirect
+
 hwraid_collect_all_used_slots
 hwraid_activate_disks
 hwraid_clear_virtual_disks
@@ -57,25 +69,34 @@ for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
 		"${HWRAID_LAYOUTS[${hwraid_array}]}"
 	hwraid_test_matrix
 done
+hwraid_cleanup
 }
 
 hwraid_add_virtual_disk() {
-	p /c0 add vd \
-	r"${raid_number}" \
-	name="${disk_config}" \
-	drives=32:"${hwraid_disk_slots}" \
-	pdcache="${pdcache}" \
-	"${writeback}"	\
-	"${readahead}" \
-	"${cachedirect}"
+
+p /c0 add vd \
+r"${raid_number}" \
+name="${disk_config}" \
+drives=32:"${hwraid_disk_slots}" \
+pdcache="${pdcache}" \
+"${writeback}"	\
+"${readahead}" \
+"${cachedirect}"
+
+testdisk_wwn_basename=wwn-0x"$(hwraid_get_wwn)"
+testdisk_by_id="/dev/disk/by-id/${testdisk_wwn_basename}"
 }
 
 hwraid_test_matrix() {
+local iodepth_i
+
 for direct in 1 0; do
-	[[ -n "${disk}" ]] && delete_ext4
+	if [[ -n "${testdisk_wwn_basename}" ]]; do
+		delete_ext4
+		p /c0/v0 delete 
+	done
 	hwraid_resolve_direct
 	hwraid_add_virtual_disk
-	disk=wwn-0x"$(hwraid_get_wwn)"
 	make_ext4
 	for profile in "${fio_profiles[@]}"; do
 		"${profile}"
@@ -107,11 +128,11 @@ for direct in 1 0; do
 done
 }
 
-umount /dev/"${drive}"
-p /c0/v0 delete 
-
-p /c0/e32/s"${DISK_HDD_SLOTS}" set jbod
-
+hwraid_cleanup() {
+delete_ext4
+hwraid_clear_virtual_disks
+p /c0/e32/s"${hwraid_all_slots_used}" set jbod
+}
 
 # Ideally, this would have a variable in place of v0,
 #  so that it could be used as part of a larger
