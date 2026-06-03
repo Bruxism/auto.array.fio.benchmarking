@@ -5,19 +5,22 @@
 #######################################
 
 make_ext4() {
-parted --script /dev/disk/by-id/"${disk}" mklabel gpt mkpart "" ext4 0% 100%
+test_mountdir="/mnt/${testdisk_wwn_basename}"
+test_partition="${testdisk_by_id}-part1"
+testfile="${test_mountdir}/testfile"
+
+parted --script "${testdisk_by_id}" mklabel gpt mkpart "" ext4 0% 100%
 sleep 1
-mkfs.ext4 -F /dev/disk/by-id/"${disk}"-part1 -E lazy_itable_init=0,lazy_journal_init=0
+mkfs.ext4 -F "${test_partition}" -E lazy_itable_init=0,lazy_journal_init=0
 sleep 1
-mkdir -p /mnt/"${disk}"
-mount -o noatime,nodiratime /dev/disk/by-id/"${disk}"-part1 /mnt/"${disk}"
-testfile=/mnt/"${disk}"/testfile
+mkdir -p "${test_mountdir}"
+mount -o noatime,nodiratime "${test_partition}" "${test_mountdir}"
 }
 
 delete_ext4() {
-umount /mnt/"${disk}"
-wipefs -af /dev/disk/by-id/"${disk}"
+umount "${test_mountdir}"
+wipefs -af "${testdisk_by_id}"
 sleep 1
-blkdiscard -f /dev/disk/by-id/"${disk}" 2> /dev/disk/by-id/null
+blkdiscard -f "${testdisk_by_id}" 2> /dev/null
 sleep 1
 }
