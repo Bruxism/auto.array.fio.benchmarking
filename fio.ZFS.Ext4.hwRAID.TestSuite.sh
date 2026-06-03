@@ -15,19 +15,25 @@ RUNTIMES=(300)
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
+timestamp(){ TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
+
 #######################################
 ########  Function Libraries  #########
 #######################################
 
-source "${SCRIPT_DIR}"/lib/*
+for file in "${SCRIPT_DIR}"/lib/*; do
+	source "${file}"
+done
 
 
 #######################################
 ########   Load Profiles    ###########
 #######################################
 
-source "${SCRIPT_DIR}"/profiles/*
-
+for file in "${SCRIPT_DIR}"/profiles/*; do
+	source "${file}"
+done
+unset file
 
 #######################################
 ########   fio Functions 	###########
@@ -49,7 +55,7 @@ local args=(
 	--gtod_reduce="${gtod_reduce}"
 	--group_reporting
 	--time_based
-	--mem_align="${mem_align:-512b}"
+	--mem_align="${mem_align:=512b}"
 	--end_fsync=1
 	--direct="${direct}"
 	--runtime="${runtime}"
@@ -87,20 +93,20 @@ fio "${args[@]}"
 fio_output_name() {
 unset extra_info
 
-case "${fs}" in
-	ZFS)
-		# TODO needs work for automation of varying configurations
-		#	It would probably be something set up at the top of the script
-		#	where disk configurations are declared to be iterated over for
-		#	testing.
-		disk_config="${DRIVE}"."${fs}"0.rs-"${recordsize}"
-	;;
-	ext4)
-		disk_config="${DRIVE}"."${fs}"
-	;;
-esac
+#case "${fs}" in
+#	ZFS)
+#		# TODO needs work for automation of varying configurations
+#		#	It would probably be something set up at the top of the script
+#		#	where disk configurations are declared to be iterated over for
+#		#	testing.
+#		disk_config="${DRIVE}"."${fs}"0.rs-"${recordsize}"
+#	;;
+#	ext4)
+#		disk_config="${DRIVE}"."${fs}"
+#	;;
+#esac
 
-if [[ -n mem_align ]]; then
+if [[ -n "${mem_align}" ]]; then
 	extra_info+=".mem_align-${mem_align}"
 fi
 if [[ "${use_pareto}" == "1" ]]; then
@@ -128,7 +134,7 @@ output_name+=".$(timestamp)"
 
 
 
-
+mkdir -p "${RESULTS_DIR}"
 
 
 
