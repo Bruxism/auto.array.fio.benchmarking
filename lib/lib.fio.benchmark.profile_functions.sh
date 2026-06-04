@@ -43,3 +43,6 @@ for profile in "${fio_profile_[@]}"; do
 	export -nf "${profile}"
 done
 }
+
+collect_fio_profiles
+collect_blocksizes
