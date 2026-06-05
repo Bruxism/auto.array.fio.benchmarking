@@ -4,15 +4,6 @@
 ########	 ZFS Config 	###########
 #######################################
 
-zpool_destroy() {
-local drive="$1"
-local zpool_name="$2"
-
-unset fs
-zpool import -a
-zpool destroy "${zpool_name}"
-wipefs -af /dev/"${drive}"
-blkdiscard -f /dev/"${drive}"
 	zfs_config_declare() {
 	local drive
 	local sda="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
@@ -49,27 +40,49 @@ blkdiscard -f /dev/"${drive}"
 	}
 	zfs_config_declare
 	declare -p zfs_all_drives_used
+
+#######################################
+########	ZFS	Functions	###########
+#######################################
+
+zfs_clear_test_drives() {
+zpool export -a
+wipefs -af "${zfs_all_drives_used[@]}"
+blkdiscard -f "${zfs_all_drives_used[@]}" 2> /dev/null
 }
 
-zpool_create() {
-local ashift="$1"
-local zpool_name="$2"
-local drive="$3"
+zfs_disk_matrix() {
+local zpool zpool_layout ashift
+local -n zpool_name=disk_config
+local testfile
 
-fs=ZFS
+zfs_clear_test_drives
+
+for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
+	disk_config="${zpool}"
+	read -r ashift zpool_layout <<<"\
+		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
+		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
+		"
+	zfs_zpool_create
+	zfs_test_matrix
+done
+hwraid_cleanup
+}
+
+zfs_zpool_create() {
 zpool create \
 -o ashift="${ashift}" \
 -o autotrim=on \
 -O relatime=on \
 "${zpool_name}" \
-/dev/"${drive}"
+"${zpool_layout}"
 }
 
 zfs_create_dataset() {
 # Depends on zfs_resolve_direct()
 local checksum="${checksum}"
 local primarycache="${primarycache}"
-local zpool_name="${ZPOOL_NAME}"
 
 recordsize="${blocksize}"
 
@@ -85,8 +98,6 @@ zfs create \
 }
 
 zfs_clear_testpool_datasets() {
-local zpool_name="${ZPOOL_NAME}"
-
 zfs destroy -r "${zpool_name}"
 }
 
@@ -110,7 +121,7 @@ case "${direct}" in
 esac
 }
 
-test_matrix_zfs() {
+zfs_test_matrix() {
 # blocksize and direct will determine what options datasets will be created
 #	because those are the primary parameters that chokes or slows down
 #	testfile creation/iteration, and the testfile has to be recreated
