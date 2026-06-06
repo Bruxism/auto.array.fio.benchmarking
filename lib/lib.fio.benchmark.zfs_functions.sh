@@ -4,23 +4,22 @@
 ########	 ZFS Config 	###########
 #######################################
 
-	zfs_config_declare() {
-	local drive
-	local sda="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
-	local sdb="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
-	local sdc="/dev/disk/by-id/wwn-0x5000cca04db11a94"
-	local sdd="/dev/disk/by-id/wwn-0x5000cca04dac6d70"
-	local sde="/dev/disk/by-id/wwn-0x5000cca072832eb8"
-	local sdf="/dev/disk/by-id/wwn-0x5000cca0729a8b00"
-	local sdg="/dev/disk/by-id/wwn-0x5000cca072837b80"
-	local sdh="/dev/disk/by-id/wwn-0x5000cca07281c3c8"
-	local sdi="/dev/disk/by-id/wwn-0x5000cca072844934"
-	local sdj="/dev/disk/by-id/wwn-0x5000cca0728495a8"
-	local sdk="/dev/disk/by-id/wwn-0x5000cca07283e2bc"
-	local sdl="/dev/disk/by-id/wwn-0x5000cca072836aa8"
-	local sdm="/dev/disk/by-id/wwn-0x5000c5006259e7db"
-
-	declare -g zfs_all_drives_used="$(
+zfs_config_declare() {
+local drive zfs_all_drives_used_temp
+local sda="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
+local sdb="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
+local sdc="/dev/disk/by-id/wwn-0x5000cca04db11a94"
+local sdd="/dev/disk/by-id/wwn-0x5000cca04dac6d70"
+local sde="/dev/disk/by-id/wwn-0x5000cca072832eb8"
+local sdf="/dev/disk/by-id/wwn-0x5000cca0729a8b00"
+local sdg="/dev/disk/by-id/wwn-0x5000cca072837b80"
+local sdh="/dev/disk/by-id/wwn-0x5000cca07281c3c8"
+local sdi="/dev/disk/by-id/wwn-0x5000cca072844934"
+local sdj="/dev/disk/by-id/wwn-0x5000cca0728495a8"
+local sdk="/dev/disk/by-id/wwn-0x5000cca07283e2bc"
+local sdl="/dev/disk/by-id/wwn-0x5000cca072836aa8"
+local sdm="/dev/disk/by-id/wwn-0x5000c5006259e7db"
+declare -ag zfs_all_drives_used
 	for drive in $(compgen -A variable sd); do
 		printf '%s ' ${!drive}
 	done
