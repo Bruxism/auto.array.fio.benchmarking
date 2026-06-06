@@ -161,38 +161,38 @@ local testfile
 #	profiles, and datasets are only recreated when all tests for the values of
 #	blocksize and direct shared in all profiles are completed
 for blocksize in "${!combined_blocksizes[@]}"; do
-for direct in 1 0; do
-for profile in "${fio_profiles[@]}"; do
-	"${profile}"
-	# Skip profiles that don't have matching blocksize
-	[[ " ${blocksizes[@]} " =~ " ${blocksize} " ]] || continue
-	# Skip profiles that don't have matching direct
-	[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
-	zfs_clear_testpool_datasets
-	zfs_resolve_direct
-	zfs_create_dataset
-	testfile="/${zpool_name}"/"${blocksize}/testfile"
-	for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
-		iodepth="${iodepths[iodepth_i]}"
-		numjobs="${numjobss[-1-iodepth_i]}"
-		for ioengine in "${ioengines[@]}"; do
-			if [[ "${ioengine}" == psync ]]; then
-				gtod_reduce=0
-			else
-				gtod_reduce=1
-			fi
-			for test_type in "${test_types[@]}"; do
-			for size in "${SIZES[@]}"; do
-			for runtime in "${RUNTIMES[@]}"; do
-			for use_pareto in "${use_paretos[@]}"; do
-				fio_function
-			done
-			done
-			done
+	testfile="/${zpool_name}/${blocksize}/testfile"
+	for direct in 1 0; do
+		zfs_clear_testpool_datasets
+		zfs_resolve_direct
+		zfs_create_dataset
+		for profile in "${fio_profiles[@]}"; do
+			"${profile}"
+			# Skip profiles that don't have matching blocksize
+			[[ " ${blocksizes[@]} " =~ " ${blocksize} " ]] || continue
+			# Skip profiles that don't have matching direct
+			[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
+			for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
+				iodepth="${iodepths[iodepth_i]}"
+				numjobs="${numjobss[-1-iodepth_i]}"
+				for ioengine in "${ioengines[@]}"; do
+					if [[ "${ioengine}" == psync ]]; then
+						gtod_reduce=0
+					else
+						gtod_reduce=1
+					fi
+					for test_type in "${test_types[@]}"; do
+					for size in "${SIZES[@]}"; do
+					for runtime in "${RUNTIMES[@]}"; do
+					for use_pareto in "${use_paretos[@]}"; do
+						fio_function
+					done
+					done
+					done
+					done
+				done
 			done
 		done
 	done
-done
-done
 done
 }
