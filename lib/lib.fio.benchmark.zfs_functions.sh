@@ -66,9 +66,6 @@ local -n zpool_name=disk_config
 zfs_clear_test_drives
 for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
 	disk_config="${zpool}"
-#	if [[ -n "${zpool_previous}" ]]; then
-#		zfs_zpool_destroy "${zpool_previous}"
-#	fi
 	zpool_previous="${zpool}"
 	read -r ashift <<<"\
 		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
