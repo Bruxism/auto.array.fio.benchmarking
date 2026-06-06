@@ -45,3 +45,5 @@ done
 }
 
 collect_blocksizes
+echo "Combined blocksizes:"
+declare -p combined_blocksizes
