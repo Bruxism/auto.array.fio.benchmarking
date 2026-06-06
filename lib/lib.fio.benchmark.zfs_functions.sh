@@ -20,25 +20,34 @@ local sdk="/dev/disk/by-id/wwn-0x5000cca07283e2bc"
 local sdl="/dev/disk/by-id/wwn-0x5000cca072836aa8"
 local sdm="/dev/disk/by-id/wwn-0x5000c5006259e7db"
 declare -ag zfs_all_drives_used
+
+zfs_all_drives_used_temp="$(
+	first=true
 	for drive in $(compgen -A variable sd); do
-		printf '%s ' ${!drive}
+		if "$first"; then
+			printf '%s' ${!drive}
+			first=false
+		else
+			printf ' %s' ${!drive}
+		fi
 	done
 	)"
+echo "${zfs_all_drives_used@Q}"
 
-	read -ra zfs_all_drives_used <<< "${zfs_all_drives_used}"
-
-	declare -Ag ZPOOL_LAYOUTS=(
-			[SSD_4STRIPE]="12 $sda $sdb $sdc $sdd"
-			[SSD_2X2RAID10]="12 mirror $sda $sdb mirror $sdc $sdd"
-			[SSD_4RAIDZ1]="12 raidz1 $sda $sdb $sdc $sdd"
-			[HDD_8STRIPE]="9 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
-			[HDD_2X4RAID10]="9 mirror $sde $sdf mirror $sdg $sdh mirror $sdi $sdj mirror $sdk $sdl"
-			[HDD_2MIRROR]="9 $sde $sdf"
-			[HDD_8RAIDZ2]="9 raidz2 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
-	)
-	}
-	zfs_config_declare
-	declare -p zfs_all_drives_used
+read -ra zfs_all_drives_used <<<  "${zfs_all_drives_used_temp}"
+echo "${zfs_all_drives_used@Q}"
+declare -Ag ZPOOL_LAYOUTS=(
+		[SSD_4STRIPE]="12 $sda $sdb $sdc $sdd"
+		[SSD_2X2RAID10]="12 mirror $sda $sdb mirror $sdc $sdd"
+		[SSD_4RAIDZ1]="12 raidz1 $sda $sdb $sdc $sdd"
+		[HDD_8STRIPE]="9 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
+		[HDD_2X4RAID10]="9 mirror $sde $sdf mirror $sdg $sdh mirror $sdi $sdj mirror $sdk $sdl"
+		[HDD_2MIRROR]="9 $sde $sdf"
+		[HDD_8RAIDZ2]="9 raidz2 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
+)
+}
+zfs_config_declare
+declare -p zfs_all_drives_used
 
 #######################################
 ########	ZFS	Functions	###########
@@ -51,22 +60,28 @@ blkdiscard -f "${zfs_all_drives_used[@]}" 2> /dev/null
 }
 
 zfs_disk_matrix() {
-local zpool zpool_layout ashift
+local zpool zpool_layout ashift zpool_previous
 local -n zpool_name=disk_config
-local testfile
 
 zfs_clear_test_drives
-
 for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
 	disk_config="${zpool}"
-	read -r ashift zpool_layout <<<"\
+#	if [[ -n "${zpool_previous}" ]]; then
+#		zfs_zpool_destroy "${zpool_previous}"
+#	fi
+	zpool_previous="${zpool}"
+	read -r ashift <<<"\
 		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
+		"
+	read -ra zpool_layout <<<"\
 		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
 		"
 	zfs_zpool_create
 	zfs_test_matrix
+	zfs_zpool_destroy "${zpool_previous}"
 done
-hwraid_cleanup
+# Cleanup
+zfs_clear_test_drives
 }
 
 zfs_zpool_create() {
@@ -75,7 +90,14 @@ zpool create \
 -o autotrim=on \
 -O relatime=on \
 "${zpool_name}" \
-"${zpool_layout}"
+"${zpool_layout[@]}"
+}
+
+zfs_zpool_destroy() {
+local zpool="$1"
+
+zpool export -f "${zpool}"
+zpool destroy -f "${zpool}"
 }
 
 zfs_create_dataset() {
@@ -104,10 +126,6 @@ zfs_resolve_direct() {
 # Depends on test_matrix()
 # Depended by zfs_create_dataset()
 
-#local direct
-#local checksum
-#local primarycache
-
 case "${direct}" in
 	1)
 		checksum=off
@@ -121,6 +139,11 @@ esac
 }
 
 zfs_test_matrix() {
+local direct checksum primarycache
+local blocksize profile iodepth_i iodepth numjobs ioengine gtod_reduce
+local test_type size runtime use_pareto
+local testfile
+
 # blocksize and direct will determine what options datasets will be created
 #	because those are the primary parameters that chokes or slows down
 #	testfile creation/iteration, and the testfile has to be recreated
@@ -151,6 +174,7 @@ for profile in "${fio_profiles[@]}"; do
 	zfs_clear_testpool_datasets
 	zfs_resolve_direct
 	zfs_create_dataset
+	testfile="/${zpool_name}"/"${blocksize}/testfile"
 	for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
 		iodepth="${iodepths[iodepth_i]}"
 		numjobs="${numjobss[-1-iodepth_i]}"
