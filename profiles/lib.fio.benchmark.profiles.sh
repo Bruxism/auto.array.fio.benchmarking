@@ -26,11 +26,11 @@ use_paretos=(0 1)
 }
 
 fio_profile_latency() {
-blocksizes=4kb
-numjobss=1
-iodepths=1
-ioengines=psync
+blocksizes=(4kb)
+numjobss=(1)
+iodepths=(1)
+ioengines=(psync)
 test_types=(randread randrw)
-directs=1
+directs=(1)
 use_paretos=(0)
 }
