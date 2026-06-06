@@ -30,7 +30,7 @@ done
 
 declare -Ag combined_blocksizes+=$(
 	declare -A combined_blocksizes
-	for profile in "${fio_profile_[@]}"; do
+	for profile in "${fio_profiles[@]}"; do
 		"${profile}"
 		for blocksize in "${blocksizes[@]}"; do
 			combined_blocksizes["${blocksize}"]=1
@@ -44,5 +44,4 @@ for profile in "${fio_profile_[@]}"; do
 done
 }
 
-collect_fio_profiles
 collect_blocksizes
