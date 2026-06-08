@@ -8,7 +8,7 @@
 #		Includes naming function adaptation
 
 ZPOOL_NAME=testdrive
-RESULTS_DIR="/root/Results/"
+RESULTS_DIR="/root/Results"
 
 SIZES=(50G)
 RUNTIMES=(300)
@@ -112,7 +112,7 @@ if [[ "${use_pareto}" == "1" ]]; then
 	extra_info+=".pareto-.8"
 fi
 
-output_name="${RESULTS_DIR}"
+output_name="${results_dir}/"
 output_name+="${disk_config}"
 output_name+=".direct-${direct}"
 output_name+=".${ioengine}"
