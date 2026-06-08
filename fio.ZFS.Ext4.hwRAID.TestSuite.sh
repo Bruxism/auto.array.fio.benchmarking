@@ -18,6 +18,14 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 timestamp(){ TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 
 #######################################
+########    Load Devices     ##########
+#######################################
+
+for file in "${SCRIPT_DIR}"/config/"$1"/*; do
+	source "${file}"
+done
+
+#######################################
 ########    Load Profiles    ##########
 #######################################
 
