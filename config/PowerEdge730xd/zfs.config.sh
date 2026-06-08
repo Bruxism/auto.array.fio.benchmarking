@@ -1,50 +1,42 @@
 #!/bin/bash
-
+declare -A ZFS_ZPOOL_LAYOUTS
+declare -A ZFS_DEVICES
 #######################################
-########	 ZFS Config 	###########
+############# ZFS Config ##############
 #######################################
 
-zfs_config_declare() {
-local drive zfs_all_drives_used_temp
-local sda="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
-local sdb="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
-local sdc="/dev/disk/by-id/wwn-0x5000cca04db11a94"
-local sdd="/dev/disk/by-id/wwn-0x5000cca04dac6d70"
-local sde="/dev/disk/by-id/wwn-0x5000cca072832eb8"
-local sdf="/dev/disk/by-id/wwn-0x5000cca0729a8b00"
-local sdg="/dev/disk/by-id/wwn-0x5000cca072837b80"
-local sdh="/dev/disk/by-id/wwn-0x5000cca07281c3c8"
-local sdi="/dev/disk/by-id/wwn-0x5000cca072844934"
-local sdj="/dev/disk/by-id/wwn-0x5000cca0728495a8"
-local sdk="/dev/disk/by-id/wwn-0x5000cca07283e2bc"
-local sdl="/dev/disk/by-id/wwn-0x5000cca072836aa8"
-local sdm="/dev/disk/by-id/wwn-0x5000c5006259e7db"
-declare -ag zfs_all_drives_used
-
-zfs_all_drives_used_temp="$(
-	first=true
-	for drive in $(compgen -A variable sd); do
-		if "$first"; then
-			printf '%s' ${!drive}
-			first=false
-		else
-			printf ' %s' ${!drive}
-		fi
-	done
-	)"
-echo "${zfs_all_drives_used@Q}"
-
-read -ra zfs_all_drives_used <<<  "${zfs_all_drives_used_temp}"
-echo "${zfs_all_drives_used@Q}"
-declare -Ag ZPOOL_LAYOUTS=(
-		[SSD_4STRIPE]="12 $sda $sdb $sdc $sdd"
-		[SSD_2X2RAID10]="12 mirror $sda $sdb mirror $sdc $sdd"
-		[SSD_4RAIDZ1]="12 raidz1 $sda $sdb $sdc $sdd"
-		[HDD_8STRIPE]="9 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
-		[HDD_2X4RAID10]="9 mirror $sde $sdf mirror $sdg $sdh mirror $sdi $sdj mirror $sdk $sdl"
-		[HDD_2MIRROR]="9 $sde $sdf"
-		[HDD_8RAIDZ2]="9 raidz2 $sde $sdf $sdg $sdh $sdi $sdj $sdk $sdl"
+ZFS_DEVICES=(
+	[sda]="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
+	[sdb]="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
+	[sdc]="/dev/disk/by-id/wwn-0x5000cca04db11a94"
+	[sdd]="/dev/disk/by-id/wwn-0x5000cca04dac6d70"
+	[sde]="/dev/disk/by-id/wwn-0x5000cca072832eb8"
+	[sdf]="/dev/disk/by-id/wwn-0x5000cca0729a8b00"
+	[sdg]="/dev/disk/by-id/wwn-0x5000cca072837b80"
+	[sdh]="/dev/disk/by-id/wwn-0x5000cca07281c3c8"
+	[sdi]="/dev/disk/by-id/wwn-0x5000cca072844934"
+	[sdj]="/dev/disk/by-id/wwn-0x5000cca0728495a8"
+	[sdk]="/dev/disk/by-id/wwn-0x5000cca07283e2bc"
+	[sdl]="/dev/disk/by-id/wwn-0x5000cca072836aa8"
+	[sdm]="/dev/disk/by-id/wwn-0x5000c5006259e7db"
 )
-}
-zfs_config_declare
-declare -p zfs_all_drives_used
+
+ZFS_ZPOOL_LAYOUTS=(
+	[SSD_4STRIPE]="12 sda sdb sdc sdd"
+	[SSD_2X2RAID10]="12 mirror sda sdb mirror sdc sdd"
+	[SSD_4RAIDZ1]="12 raidz1 sda sdb sdc sdd"
+	[HDD_8STRIPE]="9 sde sdf sdg sdh sdi sdj sdk sdl"
+	[HDD_2X4RAID10]="9 mirror sde sdf mirror sdg sdh mirror sdi sdj mirror sdk sdl"
+	[HDD_2MIRROR]="9 sde sdf"
+	[HDD_8RAIDZ2]="9 raidz2 sde sdf sdg sdh sdi sdj sdk sdl"
+)
+
+# Change ZFS_ZPOOL_LAYOUTS device names to WWN paths
+for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
+	ZFS_ZPOOL_LAYOUTS["${zpool}"]="$(
+		eval echo "$(\
+			echo "${ZFS_ZPOOL_LAYOUTS[${zpool}]}" |
+			sed -E 's/(sd.)/${ZFS_DEVICES[\1]}/g'
+			)"
+		)"
+done
