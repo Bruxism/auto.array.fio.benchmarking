@@ -18,7 +18,7 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 timestamp(){ TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 
 #######################################
-########   Load Profiles    ###########
+########    Load Profiles    ##########
 #######################################
 
 for file in "${SCRIPT_DIR}"/profiles/*; do
