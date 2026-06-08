@@ -3,15 +3,6 @@
 #set location of MegaRAID perccli
 alias p='/opt/MegaRAID/perccli/perccli64'
 
-
-# Example config declaration:
-# First section is RAID number, and the following list is the slots used
-#
- declare -A HWRAID_LAYOUTS=(
-	[HDD8diskRAID0]="0 9,11,13,15,17,19,21,23"
-	[SSD4diskRAID0]="0 0,2,4,7"
- )
-
 hwraid_activate_disks() {
 p /c0/e32/s"${hwraid_all_slots_used}" set good force
 }
