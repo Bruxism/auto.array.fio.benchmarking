@@ -100,19 +100,6 @@ fio "${args[@]}"
 fio_output_name() {
 unset extra_info
 
-#case "${fs}" in
-#	ZFS)
-#		# TODO needs work for automation of varying configurations
-#		#	It would probably be something set up at the top of the script
-#		#	where disk configurations are declared to be iterated over for
-#		#	testing.
-#		disk_config="${DRIVE}"."${fs}"0.rs-"${recordsize}"
-#	;;
-#	ext4)
-#		disk_config="${DRIVE}"."${fs}"
-#	;;
-#esac
-
 if [[ -n "${mem_align}" ]]; then
 	extra_info+=".mem_align-${mem_align}"
 fi
