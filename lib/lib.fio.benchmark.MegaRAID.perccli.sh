@@ -59,6 +59,11 @@ local testfile
 local disk_config
 local hwraid_array raid_number hwraid_disk_slots
 local pdcache writeback readahead cachedirect
+local results_dir
+
+results_dir="${RESULTS_DIR}/HWRAID"
+
+mkdir -p "${results_dir}/"
 
 hwraid_collect_all_used_slots
 hwraid_activate_disks
