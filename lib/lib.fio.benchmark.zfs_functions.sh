@@ -6,8 +6,8 @@
 
 zfs_clear_test_drives() {
 zpool export -a
-wipefs -af "${zfs_all_drives_used[@]}"
-blkdiscard -f "${zfs_all_drives_used[@]}" 2> /dev/null
+wipefs -af "${ZFS_DEVICES[@]}"
+blkdiscard -f "${ZFS_DEVICES[@]}" 2> /dev/null
 }
 
 zfs_disk_matrix() {
@@ -18,14 +18,15 @@ local results_dir="${RESULTS_DIR}/zfs"
 mkdir -p "${results_dir}/"
 
 zfs_clear_test_drives
-for zpool in "${!ZPOOL_LAYOUTS[@]}"; do
+
+for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
 	disk_config="${zpool}"
 	zpool_previous="${zpool}"
 	read -r ashift <<<"\
-		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
+		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
 		"
 	read -ra zpool_layout <<<"\
-		$(echo ${ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
+		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
 		"
 	zfs_zpool_create
 	zfs_test_matrix
