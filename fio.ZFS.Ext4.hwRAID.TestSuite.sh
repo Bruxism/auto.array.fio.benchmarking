@@ -114,11 +114,11 @@ fi
 
 output_name="${results_dir}/"
 output_name+="${disk_config}"
-output_name+=".direct-${direct}"
+output_name+=".bs-${blocksize}"
 output_name+=".${ioengine}"
+output_name+=".direct-${direct}"
 output_name+=".${test_type}"
 output_name+="${rwmixread:+.rwmixread-${rwmixread}}"
-output_name+=".bs-${blocksize}"
 output_name+=".iodepth-${iodepth}"
 output_name+=".numjobs-${numjobs}"
 output_name+=".size-${size}"
