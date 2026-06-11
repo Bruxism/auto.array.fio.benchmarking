@@ -4,7 +4,7 @@ declare -A HWRAID_LAYOUTS
 ############ HWRAID Config ############
 #######################################
 
-# First section is RAID number, and the following list is the slots used
+# First number is RAID number, and the following list is the slots used
 
 HWRAID_LAYOUTS=(
 	[HDD_8STRIPE]="0 9,11,13,15,17,19,21,23"
@@ -19,6 +19,7 @@ HWRAID_LAYOUTS=(
 	[SSD_2x2RAID10]="10 0,2,4,7"
 	[SSD_4RAID5]="5 0,2,4,7"
  )
+ readonly HWRAID_LAYOUTS
 
 HWRAID_LAYOUTS_ALL_SLOTS_COMBINED="$(
 	declare -g hwraid_all_slots_used
