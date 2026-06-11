@@ -4,24 +4,7 @@
 alias p='/opt/MegaRAID/perccli/perccli64'
 
 hwraid_activate_disks() {
-p /c0/e32/s"${hwraid_all_slots_used}" set good force
-}
-
-hwraid_collect_all_used_slots() {
-declare -g hwraid_all_slots_used
-declare -A hwraid_slots_used_array
-local some_slots_array some_slots some_slot
-
-for hwraid_array in "${HWRAID_LAYOUTS[@]}"; do
-	some_slots_array=()
-	some_slots="$(echo ${hwraid_array} | cut -d' ' -f2)"
-	IFS=, read -r -a some_slots_array <<< "${some_slots}"
-	for some_slot in "${some_slots_array[@]}"; do
-		declare -A hwraid_slots_used_array["${some_slot}"]=1
-	done
-done
-declare -g hwraid_all_slots_used=\
-"$(printf '%s\n' "${!hwraid_slots_used_array[@]}" | sort -n | paste -sd,)"
+p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set good force
 }
 
 hwraid_resolve_direct() {
@@ -54,9 +37,6 @@ local results_dir
 
 results_dir="${RESULTS_DIR}/HWRAID"
 
-mkdir -p "${results_dir}/"
-
-hwraid_collect_all_used_slots
 hwraid_activate_disks
 hwraid_clear_virtual_disks
 for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
@@ -127,7 +107,7 @@ done
 hwraid_cleanup() {
 ext4_delete
 hwraid_clear_virtual_disks
-p /c0/e32/s"${hwraid_all_slots_used}" set jbod
+p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod
 }
 
 # Ideally, this would have a variable in place of v0,
