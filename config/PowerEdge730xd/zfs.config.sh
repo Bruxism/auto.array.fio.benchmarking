@@ -5,6 +5,11 @@ declare -A ZFS_DEVICES
 ############# ZFS Config ##############
 #######################################
 
+# Device name to absolute WWN path
+#	Device name doesn't have to match actual path
+#	This is mostly for convenience
+# This is used to convert names in ZFS_ZPOOL_LAYOUTS and
+#	for wiping drives
 ZFS_DEVICES=(
 	[sda]="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
 	[sdb]="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
@@ -20,6 +25,7 @@ ZFS_DEVICES=(
 	[sdl]="/dev/disk/by-id/wwn-0x5000cca072836aa8"
 	[sdm]="/dev/disk/by-id/wwn-0x5000c5006259e7db"
 )
+readonly ZFS_DEVICES
 
 ZFS_ZPOOL_LAYOUTS=(
 	[HDD_8STRIPE]="9 sde sdf sdg sdh sdi sdj sdk sdl"
