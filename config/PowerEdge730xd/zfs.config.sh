@@ -22,13 +22,17 @@ ZFS_DEVICES=(
 )
 
 ZFS_ZPOOL_LAYOUTS=(
-	[SSD_4STRIPE]="12 sda sdb sdc sdd"
-	[SSD_2X2RAID10]="12 mirror sda sdb mirror sdc sdd"
-	[SSD_4RAIDZ1]="12 raidz1 sda sdb sdc sdd"
 	[HDD_8STRIPE]="9 sde sdf sdg sdh sdi sdj sdk sdl"
-	[HDD_2X4RAID10]="9 mirror sde sdf mirror sdg sdh mirror sdi sdj mirror sdk sdl"
-	[HDD_2MIRROR]="9 sde sdf"
-	[HDD_8RAIDZ2]="9 raidz2 sde sdf sdg sdh sdi sdj sdk sdl"
+	[HDD_1STRIPE]="9 sdh"
+	[HDD_6STRIPE]="9 sdg sdh sdi sdj sdk sdl"
+	[HDD_4x2RAID10]="9 mirror sde sdf mirror sdg sdh mirror sdi sdj mirror sdk sdl"
+	[HDD_1x2MIRROR]="9 sde sdf"
+	[HDD_8RAID6]="9 raidz2 sde sdf sdg sdh sdi sdj sdk sdl"
+	[SSD_4STRIPE]="12 sda sdb sdc sdd"
+	[SSD_3STRIPE]="12 sda sdb sdc sdd"
+	[SSD_1STRIPE]="12 sdc"
+	[SSD_2x2RAID10]="12 mirror sda sdb mirror sdc sdd"
+	[SSD_4RAID5]="12 raidz1 sda sdb sdc sdd"
 )
 
 # Change ZFS_ZPOOL_LAYOUTS device names to WWN paths
