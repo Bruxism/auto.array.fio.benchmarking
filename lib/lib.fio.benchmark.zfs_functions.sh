@@ -13,9 +13,9 @@ blkdiscard -f "${ZFS_DEVICES[@]}" 2> /dev/null
 zfs_disk_matrix() {
 local zpool zpool_layout ashift zpool_previous results_dir
 local -n zpool_name=disk_config
-local results_dir="${RESULTS_DIR}/zfs"
+local results_dir="${RESULTS_DIR}/zfs/"
 
-mkdir -p "${results_dir}/"
+mkdir -p "${results_dir}"
 
 zfs_clear_test_drives
 
