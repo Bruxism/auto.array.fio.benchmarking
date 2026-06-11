@@ -33,9 +33,9 @@ local testfile
 local disk_config
 local hwraid_array raid_number hwraid_disk_slots
 local pdcache writeback readahead cachedirect
-local results_dir
+local results_dir="${RESULTS_DIR}/HWRAID/"
 
-results_dir="${RESULTS_DIR}/HWRAID"
+mkdir -p "${results_dir}"
 
 hwraid_activate_disks
 hwraid_clear_virtual_disks

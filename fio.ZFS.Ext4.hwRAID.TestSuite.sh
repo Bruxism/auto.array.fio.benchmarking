@@ -107,7 +107,7 @@ if [[ "${use_pareto}" == "1" ]]; then
 	extra_info+=".pareto-.8"
 fi
 
-output_name="${results_dir}/"
+output_name="${results_dir}"
 output_name+="${disk_config}"
 output_name+=".bs-${blocksize}"
 output_name+=".${ioengine}"
