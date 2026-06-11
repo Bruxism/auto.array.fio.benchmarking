@@ -34,13 +34,14 @@ ZFS_ZPOOL_LAYOUTS=(
 	[SSD_2x2RAID10]="12 mirror sda sdb mirror sdc sdd"
 	[SSD_4RAID5]="12 raidz1 sda sdb sdc sdd"
 )
-
 # Change ZFS_ZPOOL_LAYOUTS device names to WWN paths
-for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
-	ZFS_ZPOOL_LAYOUTS["${zpool}"]="$(
-		eval echo "$(\
-			echo "${ZFS_ZPOOL_LAYOUTS[${zpool}]}" |
-			sed -E 's/(sd.)/${ZFS_DEVICES[\1]}/g'
-			)"
-		)"
+for pool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
+    new_layout=()
+    for token in ${ZFS_ZPOOL_LAYOUTS["${pool}"]}; do
+        new_layout+=("${ZFS_DEVICES[$token]:-$token}")
+    done
+    ZFS_ZPOOL_LAYOUTS["${pool}"]="${new_layout[*]}"
+	unset pool new_layout token
 done
+readonly ZFS_ZPOOL_LAYOUTS
+declare -p ZFS_ZPOOL_LAYOUTS
