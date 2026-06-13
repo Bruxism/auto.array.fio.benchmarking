@@ -30,7 +30,7 @@ for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
 		"
 	zfs_zpool_create
 	zfs_test_matrix
-	zfs_zpool_destroy "${zpool_previous}"
+	zpool destroy -f "${zpool_previous}"
 done
 # Cleanup
 zfs_clear_test_drives
@@ -43,13 +43,6 @@ zpool create \
 -O relatime=on \
 "${zpool_name}" \
 "${zpool_layout[@]}"
-}
-
-zfs_zpool_destroy() {
-local zpool="$1"
-
-zpool export -f "${zpool}"
-zpool destroy -f "${zpool}"
 }
 
 zfs_create_dataset() {
