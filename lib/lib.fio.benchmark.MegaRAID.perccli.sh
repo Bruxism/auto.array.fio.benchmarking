@@ -37,6 +37,7 @@ local results_dir="${RESULTS_DIR}/HWRAID/"
 
 mkdir -p "${results_dir}"
 
+sleep 1
 hwraid_activate_disks
 hwraid_clear_virtual_disks
 for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
@@ -75,9 +76,9 @@ for direct in 1 0; do
 		"${profile}"
 		# Skip psync when direct=0 since psync doesn't have direct=0
 		[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
-		hwraid_resolve_direct
-		hwraid_add_virtual_disk
-		ext4_make
+		# hwraid_resolve_direct
+		# hwraid_add_virtual_disk
+		# ext4_make
 		for blocksize in "${blocksizes[@]}"; do
 			for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
 				iodepth="${iodepths[iodepth_i]}"

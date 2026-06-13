@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 
 # TODO
 #	Add disk configuration automation
@@ -94,7 +94,7 @@ for arg in "${args[@]}"; do
 	echo "${arg}"
 done
 
-fio "${args[@]}"
+touch "${output_name}".log
 }
 
 fio_output_name() {
@@ -130,7 +130,9 @@ output_name+=".$(timestamp)"
 
 mkdir -p "${RESULTS_DIR}"
 
+zfs_disk_matrix
 
+hwraid_disk_matrix
 
 
 
