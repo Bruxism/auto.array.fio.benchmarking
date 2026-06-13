@@ -28,9 +28,9 @@ for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
 	read -ra zpool_layout <<<"\
 		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
 		"
-	# zfs_zpool_create
-	# zfs_test_matrix
-	# zfs_zpool_destroy "${zpool_previous}"
+	zfs_zpool_create
+	zfs_test_matrix
+	zpool destroy -f "${zpool_previous}"
 done
 # Cleanup
 zfs_clear_test_drives
@@ -43,13 +43,6 @@ zpool create \
 -O relatime=on \
 "${zpool_name}" \
 "${zpool_layout[@]}"
-}
-
-zfs_zpool_destroy() {
-local zpool="$1"
-
-zpool export -f "${zpool}"
-zpool destroy -f "${zpool}"
 }
 
 zfs_create_dataset() {
@@ -118,9 +111,11 @@ local testfile
 for blocksize in "${!combined_blocksizes[@]}"; do
 	testfile="/${zpool_name}/${blocksize}/testfile"
 	for direct in 1 0; do
-		# zfs_clear_testpool_datasets
-		# zfs_resolve_direct
-		# zfs_create_dataset
+		zfs_clear_testpool_datasets
+		zfs_resolve_direct
+		zfs_create_dataset
+		read -s -n 1 -r -p "Press any key to continue..."
+		echo ""   
 		for profile in "${fio_profiles[@]}"; do
 			"${profile}"
 			# Skip profiles that don't have matching blocksize
