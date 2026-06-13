@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # TODO
 #	Add disk configuration automation
 #		for hardware RAID

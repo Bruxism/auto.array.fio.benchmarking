@@ -1,5 +1,5 @@
 #!/bin/bash
-
+shopt -s expand_aliases
 #set location of MegaRAID perccli
 alias p='/opt/MegaRAID/perccli/perccli64'
 
@@ -37,6 +37,7 @@ local results_dir="${RESULTS_DIR}/HWRAID/"
 
 mkdir -p "${results_dir}"
 
+sleep 1
 hwraid_activate_disks
 hwraid_clear_virtual_disks
 for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
@@ -67,14 +68,14 @@ hwraid_test_matrix() {
 local iodepth_i
 
 for direct in 1 0; do
-	if [[ -n "${testdisk_wwn_basename}" ]]; then
-		ext4_delete
-		p /c0/v0 delete 
-	fi
 	for profile in "${fio_profiles[@]}"; do
 		"${profile}"
 		# Skip psync when direct=0 since psync doesn't have direct=0
 		[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
+		if [[ -n "${testdisk_wwn_basename}" ]]; then
+			ext4_delete
+			p /c0/v0 delete 
+		fi
 		hwraid_resolve_direct
 		hwraid_add_virtual_disk
 		ext4_make

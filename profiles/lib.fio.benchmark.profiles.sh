@@ -6,7 +6,7 @@
 #######################################
 
 fio_profile_bandwidth() {
-blocksizes=(8kb 16kb 1MB)
+blocksizes=(1MB)
 numjobss=(1 256)
 iodepths=(1 256)
 ioengines=(libaio io_uring)
@@ -16,7 +16,7 @@ use_paretos=(0 1)
 }
 
 fio_profile_iops() {
-blocksizes=(4kb 8kb 16kb)
+blocksizes=(4kb)
 numjobss=(1 256)
 iodepths=(1 256)
 ioengines=(libaio io_uring)
