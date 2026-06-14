@@ -23,6 +23,7 @@ mount -o noatime,nodiratime "${test_partition}" "${test_mountdir}"
 
 ext4_delete() {
 umount "${test_mountdir}"
+sleep 1
 rm -rf "${test_mountdir}"
 wipefs -af "${testdisk_by_id}"
 sleep 1
