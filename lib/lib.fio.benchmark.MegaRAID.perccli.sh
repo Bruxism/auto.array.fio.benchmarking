@@ -75,8 +75,6 @@ for direct in 1 0; do
 	hwraid_resolve_direct
 	hwraid_add_virtual_disk
 	ext4_make
-	read -s -n 1 -r -p "Press any key to continue..."
-	echo ""   
 	for profile in "${fio_profiles[@]}"; do
 		"${profile}"
 		# Skip psync when direct=0 since psync doesn't have direct=0

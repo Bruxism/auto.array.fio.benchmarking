@@ -129,7 +129,7 @@ output_name+=".$(timestamp)"
 
 mkdir -p "${RESULTS_DIR}"
 
-#zfs_disk_matrix
+zfs_disk_matrix
 
 hwraid_disk_matrix
 

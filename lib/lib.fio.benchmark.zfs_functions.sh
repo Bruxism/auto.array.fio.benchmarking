@@ -114,8 +114,6 @@ for blocksize in "${!combined_blocksizes[@]}"; do
 		zfs_clear_testpool_datasets
 		zfs_resolve_direct
 		zfs_create_dataset
-		read -s -n 1 -r -p "Press any key to continue..."
-		echo ""   
 		for profile in "${fio_profiles[@]}"; do
 			"${profile}"
 			# Skip profiles that don't have matching blocksize
