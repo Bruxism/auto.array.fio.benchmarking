@@ -7,8 +7,8 @@
 
 fio_profile_bandwidth() {
 blocksizes=(1MB)
-numjobss=(1 256)
-iodepths=(1 256)
+numjobss=(256)
+iodepths=(1)
 ioengines=(libaio io_uring)
 test_types=(read write)
 directs=(0 1)
@@ -17,8 +17,8 @@ use_paretos=(0 1)
 
 fio_profile_iops() {
 blocksizes=(4kb)
-numjobss=(1 256)
-iodepths=(1 256)
+numjobss=(256)
+iodepths=(1)
 ioengines=(libaio io_uring)
 test_types=(read write randread randrw)
 directs=(0 1)
