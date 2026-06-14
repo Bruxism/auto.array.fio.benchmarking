@@ -65,7 +65,7 @@ testdisk_by_id="/dev/disk/by-id/${testdisk_wwn_basename}"
 }
 
 hwraid_test_matrix() {
-local iodepth_i
+local iodepth_numjob
 
 for direct in 1 0; do
 	if [[ -n "${testdisk_wwn_basename}" ]]; then
@@ -80,9 +80,8 @@ for direct in 1 0; do
 		# Skip psync when direct=0 since psync doesn't have direct=0
 		[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
 		for blocksize in "${blocksizes[@]}"; do
-			for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
-				iodepth="${iodepths[iodepth_i]}"
-				numjobs="${numjobss[-1-iodepth_i]}"
+			for iodepth_numjob in "${iodepths_numjobs[@]}"; do
+				IFS="," read -r iodepth numjobs <<< "$(echo "${iodepth_numjob}")"
 				for ioengine in "${ioengines[@]}"; do
 					if [[ "${ioengine}" == psync ]]; then
 						gtod_reduce=0

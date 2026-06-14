@@ -85,7 +85,7 @@ esac
 
 zfs_test_matrix() {
 local direct checksum primarycache
-local blocksize profile iodepth_i iodepth numjobs ioengine gtod_reduce
+local blocksize profile iodepth_numjob iodepth numjobs ioengine gtod_reduce
 local test_type size runtime use_pareto
 local testfile
 
@@ -120,9 +120,8 @@ for blocksize in "${!combined_blocksizes[@]}"; do
 			[[ " ${blocksizes[@]} " =~ " ${blocksize} " ]] || continue
 			# Skip profiles that don't have matching direct
 			[[ " ${directs[@]} " =~ " ${direct} " ]] || continue
-			for ((iodepth_i=0; iodepth_i<"${#iodepths[@]}"; iodepth_i++)); do
-				iodepth="${iodepths[iodepth_i]}"
-				numjobs="${numjobss[-1-iodepth_i]}"
+			for iodepth_numjob in "${iodepths_numjobs[@]}"; do
+				IFS="," read -r iodepth numjobs <<< "$(echo "${iodepth_numjob}")"
 				for ioengine in "${ioengines[@]}"; do
 					if [[ "${ioengine}" == psync ]]; then
 						gtod_reduce=0
