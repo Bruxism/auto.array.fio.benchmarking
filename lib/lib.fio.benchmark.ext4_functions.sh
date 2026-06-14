@@ -9,7 +9,7 @@ test_mountdir="/mnt/fiotestmount"
 test_partition="${testdisk_by_id}-part1"
 testfile="${test_mountdir}/testfile"
 
-echo "${testfile}"
+echo "testfile path: ${testfile}"
 
 wipefs -af "${testdisk_by_id}"
 sleep 1
@@ -25,6 +25,7 @@ ext4_delete() {
 umount "${test_mountdir}"
 sleep 1
 rm -rf "${test_mountdir}"
+wipefs -af "${test_partition}"
 wipefs -af "${testdisk_by_id}"
 sleep 1
 blkdiscard -f "${testdisk_by_id}" 2> /dev/null
