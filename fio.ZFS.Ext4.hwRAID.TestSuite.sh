@@ -20,17 +20,15 @@ timestamp(){ TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 ########    Load Devices     ##########
 #######################################
 
-for file in "${SCRIPT_DIR}"/config/"$1"/*; do
+for file in "${SCRIPT_DIR}/config/${1}/"*; do
 	source "${file}"
 done
 
 #######################################
-########    Load Profiles    ##########
+#######    Load Test Profile    #######
 #######################################
 
-for file in "${SCRIPT_DIR}"/profiles/*; do
-	source "${file}"
-done
+source "${SCRIPT_DIR}/profiles/fio.benchmark.profile.${2}.sh"
 
 #######################################
 ########  Function Libraries  #########
