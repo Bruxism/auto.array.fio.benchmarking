@@ -33,7 +33,7 @@ sleep 1
 }
 
 ext4_disk_matrix() {
-local testdisk_by_id
+local disk_name testdisk_by_id
 local test_partition
 local test_mountdir
 local testfile
@@ -43,8 +43,9 @@ local results_dir="${RESULTS_DIR}/ext4/"
 mkdir -p "${results_dir}"
 
 sleep 1
-for testdisk_by_id in "${EXT4_LAYOUTS[@]}"; do
-	disk_config="${hwraid_array}"
+for disk_name in "${!EXT4_LAYOUTS[@]}"; do
+	disk_config="${disk_name}"
+	testdisk_by_id="${EXT4_LAYOUTS[${disk_name}]}"
 	wipefs -af "${testdisk_by_id}"
 	ext4_make
 	ext4_test_matrix
