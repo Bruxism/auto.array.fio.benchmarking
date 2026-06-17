@@ -50,7 +50,6 @@ hwraid_cleanup
 }
 
 hwraid_add_virtual_disk() {
-
 p /c0 add vd \
 r"${raid_number}" \
 name="${disk_config}" \
