@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # TODO
-#	Add disk configuration automation
-#		for hardware RAID
-#		for ZFS
-#		Includes naming function adaptation
+# Flags for which kinds of tests to run
 
 ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results"
