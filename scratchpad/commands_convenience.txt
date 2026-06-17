@@ -103,3 +103,4 @@ fio --name=Sequential-Throughput --filename=/dev/sdf --bs=1M --iodepth=64 --end_
 
 
 
+./fio.ZFS.Ext4.hwRAID.TestSuite.sh PE.Single exhaustive
