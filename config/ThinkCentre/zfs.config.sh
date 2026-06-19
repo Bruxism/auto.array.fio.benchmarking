@@ -11,7 +11,7 @@ declare -A ZFS_DEVICES
 # This is used to convert names in ZFS_ZPOOL_LAYOUTS and
 #	for wiping drives
 ZFS_DEVICES=(
-	[sda]="/dev/disk/by-id/wwn-0x33333330000007d0"
+	[sda]="/dev/disk/by-id/nvme-eui.e8238fa6bf530001001b448b4ebdf8cc"
 )
 readonly ZFS_DEVICES
 
