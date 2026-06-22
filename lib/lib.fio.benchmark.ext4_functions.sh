@@ -38,7 +38,7 @@ local test_partition
 local test_mountdir
 local testfile
 local disk_config
-local results_dir="${RESULTS_DIR}/ext4/"
+local results_dir="${RESULTS_DIR}/ext4"
 
 mkdir -p "${results_dir}"
 
