@@ -13,6 +13,16 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 timestamp() { TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 
+list_drives() {
+local filename="${RESULTS_DIR}"/lsblk.txt
+
+	{
+	echo "lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN"
+	echo ""
+	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN
+	} | tee "${filename}"
+}
+
 #######################################
 ########    Load Devices     ##########
 #######################################
@@ -129,6 +139,7 @@ hwraid_clear_virtual_disks
 p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod
 
 zfs_disk_matrix
+list_drives
 
 hwraid_test_matrix
 
