@@ -11,7 +11,7 @@ RUNTIMES=(300)
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
-timestamp(){ TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
+timestamp() { TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 
 #######################################
 ########    Load Devices     ##########
