@@ -38,8 +38,14 @@ local results_dir="${RESULTS_DIR}/HWRAID"
 mkdir -p "${results_dir}"
 
 sleep 1
+
+p /c0 show all > "${results_dir}"/controller_info.txt
+
 hwraid_activate_disks
 hwraid_clear_virtual_disks
+
+p /c0/e32/sall show all > "${results_dir}"/drives_all_info.txt
+
 for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
 	disk_config="${hwraid_array}"
 	read -r raid_number hwraid_disk_slots <<<\
@@ -58,6 +64,9 @@ pdcache="${pdcache}" \
 "${writeback}"	\
 "${readahead}" \
 "${cachedirect}"
+
+sleep 1
+p /c0/v0 show all > "${results_dir}"/"${disk_config}".txt
 
 testdisk_wwn_basename=wwn-0x"$(hwraid_get_wwn)"
 testdisk_by_id="/dev/disk/by-id/${testdisk_wwn_basename}"
