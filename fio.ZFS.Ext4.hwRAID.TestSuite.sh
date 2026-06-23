@@ -103,6 +103,7 @@ for arg in "${args[@]}"; do
 	echo "${arg}"
 done
 
+clear_cache
 fio "${args[@]}"
 }
 
