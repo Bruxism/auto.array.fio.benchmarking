@@ -75,6 +75,10 @@ local args=(
 	--end_fsync=1
 	--direct="${direct}"
 	--runtime="${runtime}"
+# offset_increment is needed to avoid inflation of sequential reads
+#  when numjobs is high as the exact same spot will simultaneously be read
+#  the number of times that numjobs is set to
+	--offset_increment=356M
 	--output-format=normal,json
 	)
 	
