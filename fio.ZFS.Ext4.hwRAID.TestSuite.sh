@@ -140,8 +140,8 @@ output_name+=".$(timestamp)"
 mkdir -p "${RESULTS_DIR}"
 
 hwraid_clear_virtual_disks
+p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod force
 
-p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod
 
 zfs_disk_matrix
 list_drives
