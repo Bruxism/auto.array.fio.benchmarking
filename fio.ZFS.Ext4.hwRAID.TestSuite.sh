@@ -135,36 +135,18 @@ output_name+=".$(timestamp)"
 ##########       Main        ##########
 #######################################
 
-
-
 mkdir -p "${RESULTS_DIR}"
 
+# Prepare / Wipe Drives for either zfs or ext4 testing
+#  HWRAID testing already prepares itself, but without these,
+#  zfs and ext4 would error out.
 hwraid_clear_virtual_disks
 p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod force
 
-
-zfs_disk_matrix
+# Save lsblk drive info to results folder
 list_drives
 
-hwraid_test_matrix
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Add any combination of the following below comment:
+#  zfs_disk_matrix
+#  hwraid_disk_matrix
+#  ext4_disk_matrix
