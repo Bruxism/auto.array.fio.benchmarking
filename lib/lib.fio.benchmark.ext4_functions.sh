@@ -72,6 +72,7 @@ for profile in "${fio_profiles[@]}"; do
 					for size in "${SIZES[@]}"; do
 					for runtime in "${RUNTIMES[@]}"; do
 					for use_pareto in "${use_paretos[@]}"; do
+						clear_cache
 						fio_function
 					done
 					done
