@@ -20,3 +20,4 @@ Setting multiple jobs with rw=read starts all jobs at the same place and basical
 		--offset_increment=
 		--rw=randread:N
 			N is number of operations before jumping to another random read spot (blocksize * N sequential reads)
+	`--write_iolog=` helped me figure it out when I found absurdly inflated results--@~25GiB/s reads
