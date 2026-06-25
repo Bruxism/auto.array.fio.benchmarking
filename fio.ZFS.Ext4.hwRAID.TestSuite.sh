@@ -71,7 +71,7 @@ local args=(
 	--gtod_reduce="${gtod_reduce}"
 	--group_reporting
 	--time_based
-	--mem_align="${mem_align:=512b}"
+#	--mem_align="${mem_align:=512b}"
 	--end_fsync=1
 	--direct="${direct}"
 	--runtime="${runtime}"
