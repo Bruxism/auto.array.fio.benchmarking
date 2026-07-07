@@ -1,4 +1,43 @@
 #!/bin/bash
+# These two should already exist:
+## declare -A ZFS_ZPOOL_LAYOUTS
+## declare -A ZFS_DEVICES
+declare -A ZFS_TEST_DRIVES
+
+#######################################
+###### ZFS Variable Declarations ######
+#######################################
+
+if [[ -n "${ZFS_ZPOOL_LAYOUTS[@]}" && -n "${ZFS_DEVICES[@]}" ]]; then
+	# Change ZFS_ZPOOL_LAYOUTS device names to WWN paths
+	for pool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
+		new_layout=()
+		for token in ${ZFS_ZPOOL_LAYOUTS["${pool}"]}; do
+			new_layout+=("${ZFS_DEVICES[$token]:-$token}")
+		done
+		ZFS_ZPOOL_LAYOUTS["${pool}"]="${new_layout[*]}"
+	done
+	unset pool new_layout token
+	echo
+	declare -p ZFS_ZPOOL_LAYOUTS
+	echo
+
+	# Set ZFS_TEST_DRIVES so that zfs_clear_test_drives() can properly wipe them
+	for token in ${ZFS_ZPOOL_LAYOUTS[*]}; do
+		case "${token}" in
+			/dev/disk/by-id/*)
+				ZFS_TEST_DRIVES["${token}"]=1
+			;;
+		esac
+	done
+	unset token
+	echo
+	declare -p ZFS_TEST_DRIVES
+	echo
+else
+	echo "Variables ZFS_ZPOOL_LAYOUTS and ZFS_DEVICES not found."\
+		"Skipping declarations."
+fi
 
 #######################################
 ########	ZFS	Functions	 ##########
