@@ -3,6 +3,34 @@ shopt -s expand_aliases
 #set location of MegaRAID perccli
 alias p='/opt/MegaRAID/perccli/perccli64'
 
+#######################################
+##### HWRAID Variable Declaration #####
+#######################################
+
+if [[ -n "${HWRAID_LAYOUTS[@]}" ]]; then
+	HWRAID_LAYOUTS_ALL_SLOTS_COMBINED="$(
+		declare -g hwraid_all_slots_used
+		declare -A hwraid_slots_used_array
+
+		for hwraid_array in "${HWRAID_LAYOUTS[@]}"; do
+			some_slots_array=()
+			some_slots="$(echo ${hwraid_array} | cut -d' ' -f2)"
+			IFS=, read -r -a some_slots_array <<< "${some_slots}"
+			for some_slot in "${some_slots_array[@]}"; do
+				declare -A hwraid_slots_used_array["${some_slot}"]=1
+			done
+		done
+
+		printf '%s\n' "${!hwraid_slots_used_array[@]}" | sort -n | paste -sd,
+	)"
+else
+	echo "Variables HWRAID_LAYOUTS not found. Skipping declarations."
+fi
+
+#######################################
+########## HWRAID Functions ###########
+#######################################
+
 hwraid_activate_disks() {
 p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set good force
 }
