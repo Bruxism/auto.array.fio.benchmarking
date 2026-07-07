@@ -10,11 +10,13 @@ unset fio_profiles
 local profile
 declare -ag fio_profiles
 
+echo
 echo "fio profiles:"
 for profile in $(compgen -A function fio_profile_); do
 	echo "${profile}"
 	fio_profiles+=("${profile}")
 done
+echo
 }
 
 collect_blocksizes() {
@@ -42,8 +44,11 @@ declare -Ag combined_blocksizes+=$(
 for profile in "${fio_profile_[@]}"; do
 	export -nf "${profile}"
 done
+
+echo
+echo "Combined blocksizes:"
+declare -p combined_blocksizes
+echo
 }
 
 collect_blocksizes
-echo "Combined blocksizes:"
-declare -p combined_blocksizes
