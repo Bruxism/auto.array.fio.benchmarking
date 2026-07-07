@@ -1,6 +1,6 @@
 #!/bin/bash
-declare -A ZFS_ZPOOL_LAYOUTS
 declare -A ZFS_DEVICES
+declare -A ZFS_ZPOOL_LAYOUTS
 #######################################
 ############# ZFS Config ##############
 #######################################
@@ -25,19 +25,7 @@ ZFS_DEVICES=(
 	[sdl]="/dev/disk/by-id/wwn-0x5000cca072836aa8"
 	[sdm]="/dev/disk/by-id/wwn-0x5000c5006259e7db"
 )
-readonly ZFS_DEVICES
 
 ZFS_ZPOOL_LAYOUTS=(
 	[SSD_4STRIPE]="12 sda sdb sdc sdd"
 )
-# Change ZFS_ZPOOL_LAYOUTS device names to WWN paths
-for pool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
-    new_layout=()
-    for token in ${ZFS_ZPOOL_LAYOUTS["${pool}"]}; do
-        new_layout+=("${ZFS_DEVICES[$token]:-$token}")
-    done
-    ZFS_ZPOOL_LAYOUTS["${pool}"]="${new_layout[*]}"
-	unset pool new_layout token
-done
-readonly ZFS_ZPOOL_LAYOUTS
-declare -p ZFS_ZPOOL_LAYOUTS
