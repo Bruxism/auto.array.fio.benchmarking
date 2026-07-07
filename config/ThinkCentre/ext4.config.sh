@@ -7,4 +7,3 @@ declare -A EXT4_LAYOUTS
 EXT4_LAYOUTS=(
 	[NVMe]='/dev/disk/by-id/nvme-eui.e8238fa6bf530001001b448b4ebdf8cc'
 )
-readonly EXT4_LAYOUTS
