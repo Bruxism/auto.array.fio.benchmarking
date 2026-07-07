@@ -44,9 +44,13 @@ fi
 #######################################
 
 zfs_clear_test_drives() {
+local drive
+
 zpool export -a
-wipefs -af "${ZFS_DEVICES[@]}"
-blkdiscard -f "${ZFS_DEVICES[@]}" 2> /dev/null
+wipefs -af "${!ZFS_TEST_DRIVES[@]}"
+for drive in "${!ZFS_TEST_DRIVES[@]}"; do
+	blkdiscard -f "${drive}" 2> /dev/null
+done
 }
 
 zfs_disk_matrix() {
