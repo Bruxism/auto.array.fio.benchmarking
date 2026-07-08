@@ -16,7 +16,7 @@ ZFS can't leverage iodepth with libaio while direct=1
 Logbias=throughput is terrible unless you're using SLOG
 	https://www.reddit.com/r/zfs/comments/azt8sz/logbiasthroughput_without_a_slog/
 
-Setting multiple jobs with rw=read starts all jobs at the same place and basically just reads once from disk and then N-1 jobs from cache
+Setting multiple jobs with rw=read and direct=0 starts all jobs at the same place and basically just reads once from disk and then N-1 jobs from cache
 	solutions include:
 		--offset_increment=
 		--rw=randread:N
