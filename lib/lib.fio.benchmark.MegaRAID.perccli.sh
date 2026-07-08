@@ -91,7 +91,8 @@ drives=32:"${hwraid_disk_slots}" \
 pdcache="${pdcache}" \
 "${writeback}"	\
 "${readahead}" \
-"${cachedirect}"
+"${cachedirect}" \
+strip="${strip:=64}"
 
 sleep 1
 p /c0/v0 show all > "${results_dir}"/"${disk_config}".txt
