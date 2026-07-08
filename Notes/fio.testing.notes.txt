@@ -6,11 +6,12 @@ I've really been trying to set up these test to favor zfs
 	Partly because I know ARC is a huge improvement and direct=1 with primarycache=off||metadata put it as a huge disadvantage
 
 
-ZFS can't leverage iodepth with libaio
+ZFS can't leverage iodepth with libaio while direct=1
 	https://github.com/openzfs/zfs/discussions/17032
 		https://github.com/openzfs/zfs/discussions/17032#discussioncomment-12083322
 			If I understood correctly, libaio relies on pagecache to stack iodepth, but since zfs doesn't use it, it can't leverage a stacked iodepth
 	Instead, it should be kept at 1 and use numjob instead
+	Direct=0 works fine
 
 Logbias=throughput is terrible unless you're using SLOG
 	https://www.reddit.com/r/zfs/comments/azt8sz/logbiasthroughput_without_a_slog/
