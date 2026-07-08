@@ -78,7 +78,10 @@ local args=(
 # offset_increment is needed to avoid inflation of sequential reads
 #  when numjobs is high as the exact same spot will simultaneously be read
 #  the number of times that numjobs is set to
-	--offset_increment=356M
+#	--offset_increment=356M
+# Here, it was disabled as--really--there shouldn't be a job defined where
+#  jobs are greater than 1 for sequential reads, but if there are, this
+#  is a reminder to set something accordingly
 	--output-format=normal,json
 	)
 	
