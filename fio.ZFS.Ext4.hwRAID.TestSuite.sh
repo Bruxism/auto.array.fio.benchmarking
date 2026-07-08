@@ -84,11 +84,15 @@ local args=(
 #  is a reminder to set something accordingly
 	--output-format=normal,json
 	)
-	
+
+# Pareto principle states something like:
+#  20% of things happen 80% of places/situations and vice versa
+# Thanks to `https://csurbhi.github.io/fio-benchmark-random-writes/`
+#  for finding the pareto power of `0.9517` to get an 80/20 split
 if [[ "${use_pareto}" == "1" ]]; then
 	args+=( 
 		--norandommap=1
-		--random_distribution=pareto:0.8
+		--random_distribution=pareto:0.9517
 		)
 fi
 
