@@ -48,32 +48,23 @@ watch  -n1 iostat -y --human 1 1
 
 prep_zfs () {
 disk_config=ZFS_SSD_2STRIPE				# Needed
-
 declare -n zpool_name=disk_config
-results_dir="${RESULTS_DIR}/zfs"
-mkdir -p "${results_dir}"
-
-disk_config=ZFS_SSD_2STRIPE
 declare -n zpool=disk_config
+results_dir="${RESULTS_DIR}/zfs"
+
+mkdir -p "${results_dir}"
 
 zfs_clear_test_drives
 
-zpool_previous="${zpool}"
-	read -r ashift <<<"\
+read -r ashift <<<"\
 $(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
 "
-	read -ra zpool_layout <<<"\
+read -ra zpool_layout <<<"\
 $(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
 "
-	zfs_zpool_create
-	read -ra zpool_layout <<<"\
-		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
-		"
 
 zfs_zpool_create
-
 zfs_resolve_direct
-
 #checksum=off
 zfs_clear_testpool_datasets
 zfs_create_dataset
