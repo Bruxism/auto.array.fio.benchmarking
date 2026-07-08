@@ -23,4 +23,17 @@ Setting multiple jobs with rw=read and direct=0 starts all jobs at the same plac
 			N is number of operations before jumping to another random read spot (blocksize * N sequential reads)
 	`--write_iolog=` helped me figure it out when I found absurdly inflated results--@~25GiB/s reads
 
-If ZFS and HWRAID are running at the same time with cache enabled, ZFS hogs up the cache leaving HWRAID at a disadvantage
+Tangentially related is when multiple jobs are run simultaneously with direct=0 and random read where, by default, random mapping is on, cache actually gets hits from the occasion that each job happens to read something the other had already cached
+	Random mapping is where any single job with randomness is set to not repeat any area until all others have been gone over
+	Each job has independent random mapping, so with it on--which it is by default--a single job wont get cache hits unless it already was in cache from a previous run or it's still in cache after having gone over 100% of the data and begun repeating
+	`--norandommap` can be used to make each request random, and that way, there's a chance for cache hits to happen before having read over 100% of the test size
+		Results with `--norandommap` between jobs=1 & iodepth=20 vs jobs=20 & iodepth=1 are similar or equal
+
+
+If ZFS and HWRAID are running at the same time with cache enabled, ZFS hogs up RAM leaving HWRAID at a disadvantage
+
+I had set a pareto parameter for some testing--really for direct=0--to simulate realistic targeting for cache hits
+	'realistic' in the sense that pareto principle states something like: 20% of things happen 80% of places/situations and vice versa
+	To get 80/20, the pareto factor should be set to `0.9517`
+		Answer found thanks to here: https://csurbhi.github.io/fio-benchmark-random-writes/
+			Archive: https://web.archive.org/web/20260708230410/https://csurbhi.github.io/fio-benchmark-random-writes/
