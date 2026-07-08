@@ -21,3 +21,5 @@ Setting multiple jobs with rw=read starts all jobs at the same place and basical
 		--rw=randread:N
 			N is number of operations before jumping to another random read spot (blocksize * N sequential reads)
 	`--write_iolog=` helped me figure it out when I found absurdly inflated results--@~25GiB/s reads
+
+If ZFS and HWRAID are running at the same time with cache enabled, ZFS hogs up the cache leaving HWRAID at a disadvantage
