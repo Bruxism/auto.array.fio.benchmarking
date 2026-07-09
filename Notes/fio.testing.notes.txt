@@ -37,3 +37,10 @@ I had set a Pareto parameter for some testing--really for direct=0--to simulate 
 	To get 80/20, the Pareto factor should be set to `0.9517`
 		Answer found thanks to here: https://csurbhi.github.io/fio-benchmark-random-writes/
 			Archive: https://web.archive.org/web/20260708230410/https://csurbhi.github.io/fio-benchmark-random-writes/
+
+I'm working on a profile tentatively called 'default', and I'm pretty much going with all io_uring with the exception of the latency profile since io_uring has the most compatibility
+	I chose iodepth=20 and numjobs=1 for the sequential tests since sequential tests with reads would suffer from stacked cache reads mentioned earlier since all of them would start at the same place
+		Controlling for sequential reads with numjobs greater than 1 with offset_increment seems contrived to me when I could use iodepth instead
+	For tests with randomization, I use numjobs=20 and iodepth=1 instead since the IOPS numbers seem marginally higher when benchmarking that way which should match actual max performance
+		On that note, I did still include direct=0 because ZFS is renowned for a more intelligent caching algo that would be unfair to exclude since it is practical in real life
+			When combined with Pareto, it ought to give it a significant advantage
