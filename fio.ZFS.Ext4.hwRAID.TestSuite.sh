@@ -144,7 +144,7 @@ if [[ -n "${mem_align}" ]]; then
 	extra_info+=".mem_align-${mem_align}"
 fi
 if [[ "${use_pareto}" == "1" ]]; then
-	extra_info+=".pareto-.8"
+	extra_info+=".pareto-0.9517"
 fi
 
 output_name="${results_dir}"/
