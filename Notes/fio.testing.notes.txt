@@ -32,8 +32,8 @@ Tangentially related is when multiple jobs are run simultaneously with direct=0 
 
 If ZFS and HWRAID are running at the same time with cache enabled, ZFS hogs up RAM leaving HWRAID at a disadvantage
 
-I had set a pareto parameter for some testing--really for direct=0--to simulate realistic targeting for cache hits
-	'realistic' in the sense that pareto principle states something like: 20% of things happen 80% of places/situations and vice versa
-	To get 80/20, the pareto factor should be set to `0.9517`
+I had set a Pareto parameter for some testing--really for direct=0--to simulate realistic targeting for cache hits
+	'realistic' in the sense that Pareto principle states something like: 20% of things happen 80% of places/situations and vice versa
+	To get 80/20, the Pareto factor should be set to `0.9517`
 		Answer found thanks to here: https://csurbhi.github.io/fio-benchmark-random-writes/
 			Archive: https://web.archive.org/web/20260708230410/https://csurbhi.github.io/fio-benchmark-random-writes/
