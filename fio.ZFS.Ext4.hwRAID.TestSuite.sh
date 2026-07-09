@@ -7,7 +7,7 @@ ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results"
 
 SIZES=(50G)
-RUNTIMES=(300)
+RUNTIMES=(180)
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
