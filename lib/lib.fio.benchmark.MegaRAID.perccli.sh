@@ -92,7 +92,7 @@ pdcache="${pdcache}" \
 "${writeback}"	\
 "${readahead}" \
 "${cachedirect}" \
-strip="${strip:=64}"
+strip="${strip:-64}"
 
 sleep 1
 p /c0/v0 show all > "${results_dir}"/"${disk_config}".txt
