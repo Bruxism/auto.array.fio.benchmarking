@@ -68,7 +68,7 @@ local args=(
 	--rw="${test_type}"
 	--size="${size}"
 	--numjobs="${numjobs}"
-	--gtod_reduce="${gtod_reduce}"
+	--gtod_reduce="${gtod_reduce:-0}"
 	--group_reporting
 	--time_based
 #	--mem_align="${mem_align:=512b}"
