@@ -96,6 +96,8 @@ if [[ "${use_pareto}" == "1" ]]; then
 		)
 fi
 
+# Similarly, we may presume that in mixed read/write environments
+#  that reads, being more common, will weigh to about 80% of instructions
 case "${test_type}" in
 	randrw|readwrite|rw)
 		args+=(--rwmixread=80)
