@@ -4,7 +4,7 @@
 ########	Ext4 Functions	###########
 #######################################
 
-ext4_make() {
+ext4_make () {
 test_mountdir="/mnt/fiotestmount"
 test_partition="${testdisk_by_id}-part1"
 testfile="${test_mountdir}/testfile"
@@ -21,7 +21,7 @@ mkdir -p "${test_mountdir}"
 mount -o noatime,nodiratime "${test_partition}" "${test_mountdir}"
 }
 
-ext4_delete() {
+ext4_delete () {
 umount "${test_mountdir}"
 sleep 1
 rm -rf "${test_mountdir}"
@@ -32,7 +32,7 @@ blkdiscard -f "${testdisk_by_id}" 2> /dev/null
 sleep 1
 }
 
-ext4_disk_matrix() {
+ext4_disk_matrix () {
 local disk_name testdisk_by_id
 local test_partition
 local test_mountdir
@@ -53,7 +53,7 @@ for disk_name in "${!EXT4_LAYOUTS[@]}"; do
 done
 }
 
-ext4_test_matrix() {
+ext4_test_matrix () {
 local iodepth_numjob
 
 for profile in "${fio_profiles[@]}"; do
