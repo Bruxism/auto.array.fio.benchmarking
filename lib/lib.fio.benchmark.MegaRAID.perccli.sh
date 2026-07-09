@@ -120,20 +120,15 @@ for direct in 1 0; do
 			for iodepth_numjob in "${iodepths_numjobs[@]}"; do
 				IFS="," read -r iodepth numjobs <<< "$(echo "${iodepth_numjob}")"
 				for ioengine in "${ioengines[@]}"; do
-					if [[ "${ioengine}" == psync ]]; then
-						gtod_reduce=0
-					else
-						gtod_reduce=1
-					fi
-					for test_type in "${test_types[@]}"; do
-						for size in "${SIZES[@]}"; do
-						for runtime in "${RUNTIMES[@]}"; do
-						for use_pareto in "${use_paretos[@]}"; do
-							fio_function
-						done
-						done
-						done
-					done
+				for test_type in "${test_types[@]}"; do
+				for size in "${SIZES[@]}"; do
+				for runtime in "${RUNTIMES[@]}"; do
+				for use_pareto in "${use_paretos[@]}"; do
+					fio_function
+				done
+				done
+				done
+				done
 				done
 			done
 		done
