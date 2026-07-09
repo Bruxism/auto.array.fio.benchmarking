@@ -108,6 +108,23 @@ case "${test_type}" in
 	;;
 esac
 
+# By default, 'random' I/O types map out the test area such that no area gets
+#  repeated until all of the test area has been hit--just in random order
+# This turns that off so that 'random' is actually random--as one would
+#  presume by 'random' in the test name
+# This should only matter when direct=0 since only then should cache be
+#  involved
+# This code was included to only apply in situations relevant in order to
+#  not make it appear in irrelevant situations where its inclusion may cause
+#  some confusion
+if [[ "${direct}" == 0 ]]; then
+	case "${test_type}" in
+		randread|randwrite|randtrim|randrw|randtrimwrite)
+			args+=(--norandommap)
+		;;
+	esac
+fi
+
 fio_output_name
 args+=(--output="${output_name}".log)
 args+=(--name="fiotest")
