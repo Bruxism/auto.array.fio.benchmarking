@@ -4,6 +4,9 @@ chmod +x fio.ZFS.Ext4.hwRAID.TestSuite.sh
 source fio.ZFS.Ext4.hwRAID.TestSuite.sh PE.2StripeSplit pareto
 alias f=fio_function
 alias r='less +G ${output}.log'
+alias h=prep_hwraid
+alias z=prep_zfs
+alias t='f;r'
 declare -n output=output_name
 
 size=30GB
