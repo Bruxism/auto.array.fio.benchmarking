@@ -95,7 +95,7 @@ pdcache="${pdcache}" \
 strip="${strip:-64}"
 
 sleep 1
-p /c0/v0 show all > "${results_dir}"/"${disk_config}".txt
+p /c0/v0 show all > "${results_dir}"/"${disk_config}"."$(timestamp)".txt
 
 testdisk_wwn_basename=wwn-0x"$(hwraid_get_wwn)"
 testdisk_by_id="/dev/disk/by-id/${testdisk_wwn_basename}"
