@@ -21,7 +21,7 @@ gtod_reduce=1
 # mem_align=512b
 use_pareto=1
 
-prep_hwraid () {
+prep_hwraid() {
 disk_config=HW_SSD_2STRIPE				# Needed
 
 results_dir="${RESULTS_DIR}/HWRAID"
@@ -44,12 +44,12 @@ unset mem_align
 #testfile="${test_mountdir}/"	# for use with --directory
 }
 
-watch_color () {
+watch_color() {
 export S_COLORS=always
 watch  -n1 iostat -y --human 1 1
 }
 
-prep_zfs () {
+prep_zfs() {
 disk_config=ZFS_SSD_2STRIPE				# Needed
 declare -n zpool_name=disk_config
 declare -n zpool=disk_config
@@ -76,7 +76,7 @@ testfile="/${zpool_name}/${blocksize}/testfile"
 }
 
 
-prep_unused () {
+prep_unused() {
 zfs_clear_test_drives
 hwraid_activate_disks
 hwraid_add_virtual_disk
