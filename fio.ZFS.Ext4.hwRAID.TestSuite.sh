@@ -14,7 +14,7 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 timestamp() { TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
 
 list_drives() {
-local filename="${RESULTS_DIR}"/lsblk.txt
+local filename="${RESULTS_DIR}"/lsblk."$(timestamp)".txt
 
 	{
 	echo "lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN"
