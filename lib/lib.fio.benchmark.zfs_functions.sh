@@ -90,7 +90,6 @@ zpool create \
 }
 
 zfs_create_dataset() {
-# Depends on zfs_resolve_direct()
 local checksum="${checksum}"
 local primarycache="${primarycache}"
 
@@ -112,8 +111,6 @@ zfs destroy -r "${zpool_name}"
 }
 
 zfs_resolve_direct() {
-# Depends on test_matrix()
-# Depended by zfs_create_dataset()
 
 case "${direct}" in
 	1)
