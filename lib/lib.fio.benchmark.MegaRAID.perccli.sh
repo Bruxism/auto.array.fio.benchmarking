@@ -31,6 +31,16 @@ fi
 ########## HWRAID Functions ###########
 #######################################
 
+hwraid_clear_virtual_disks() {
+p /c0/vall delete force
+}
+
+hwraid_cleanup() {
+ext4_delete
+hwraid_clear_virtual_disks
+p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod
+}
+
 hwraid_activate_disks() {
 p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set good force
 }
@@ -81,6 +91,13 @@ for hwraid_array in "${!HWRAID_LAYOUTS[@]}"; do
 	hwraid_test_matrix
 done
 hwraid_cleanup
+}
+
+# Ideally, this would have a variable in place of v0 (virtual disk 0),
+#  so that it could be used as part of a larger automation.
+hwraid_get_wwn() {
+p /c0/v0 show all |
+sed -n 's/SCSI NAA Id = \(.*\)/\1/p'
 }
 
 hwraid_add_virtual_disk() {
@@ -134,22 +151,4 @@ for direct in 1 0; do
 		done
 	done
 done
-}
-
-hwraid_cleanup() {
-ext4_delete
-hwraid_clear_virtual_disks
-p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod
-}
-
-# Ideally, this would have a variable in place of v0,
-#  so that it could be used as part of a larger
-#  automation.
-hwraid_get_wwn() {
-p /c0/v0 show all |
-sed -n 's/SCSI NAA Id = \(.*\)/\1/p'
-}
-
-hwraid_clear_virtual_disks() {
-p /c0/vall delete force
 }
