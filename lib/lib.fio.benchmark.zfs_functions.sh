@@ -1,6 +1,4 @@
 #!/bin/bash
-# TODO
-## selectively export only the pools that drives being tested are assigned to
 
 # These two should already exist:
 ## declare -A ZFS_ZPOOL_LAYOUTS
