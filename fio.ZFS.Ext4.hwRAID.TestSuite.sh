@@ -178,6 +178,7 @@ p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod force
 list_drives
 
 # Add any combination of the following below comment:
+#  raw_disk_matrix
 #  zfs_disk_matrix
 #  hwraid_disk_matrix
 #  ext4_disk_matrix
