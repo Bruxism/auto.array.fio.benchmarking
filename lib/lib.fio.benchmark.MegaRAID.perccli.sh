@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s expand_aliases
-#set location of MegaRAID perccli
+#set location of MegaRAID perccli to `alias p`
 alias p='/opt/MegaRAID/perccli/perccli64'
 
 #######################################
