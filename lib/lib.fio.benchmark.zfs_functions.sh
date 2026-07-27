@@ -54,30 +54,8 @@ for drive in "${!ZFS_TEST_DRIVES[@]}"; do
 done
 }
 
-zfs_disk_matrix() {
-local zpool zpool_layout ashift zpool_previous results_dir
-local -n zpool_name=disk_config
-local results_dir="${RESULTS_DIR}/zfs"
-
-mkdir -p "${results_dir}"
-
-zfs_clear_test_drives
-
-for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
-	disk_config="${zpool}"
-	zpool_previous="${zpool}"
-	read -r ashift <<<"\
-		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
-		"
-	read -ra zpool_layout <<<"\
-		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
-		"
-	zfs_zpool_create
-	zfs_test_matrix
-	zpool destroy -f "${zpool_previous}"
-done
-# Cleanup
-zfs_clear_test_drives
+zfs_clear_testpool_datasets() {
+zfs destroy -r "${zpool_name}"
 }
 
 zfs_zpool_create() {
@@ -106,12 +84,7 @@ zfs create \
 "${zpool_name}"/"${recordsize}"
 }
 
-zfs_clear_testpool_datasets() {
-zfs destroy -r "${zpool_name}"
-}
-
 zfs_resolve_direct() {
-
 case "${direct}" in
 	1)
 		checksum=off
@@ -122,6 +95,32 @@ case "${direct}" in
 		primarycache=all
 	;;
 esac
+}
+
+zfs_disk_matrix() {
+local zpool zpool_layout ashift zpool_previous results_dir
+local -n zpool_name=disk_config
+local results_dir="${RESULTS_DIR}/zfs"
+
+mkdir -p "${results_dir}"
+
+zfs_clear_test_drives
+
+for zpool in "${!ZFS_ZPOOL_LAYOUTS[@]}"; do
+	disk_config="${zpool}"
+	zpool_previous="${zpool}"
+	read -r ashift <<<"\
+		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f1) \
+		"
+	read -ra zpool_layout <<<"\
+		$(echo ${ZFS_ZPOOL_LAYOUTS[$zpool]} | cut -d" " -f2-) \
+		"
+	zfs_zpool_create
+	zfs_test_matrix
+	zpool destroy -f "${zpool_previous}"
+done
+# Cleanup
+zfs_clear_test_drives
 }
 
 zfs_test_matrix() {
