@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# TODO
-# Flags for which kinds of tests to run
-
 ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results"
 
@@ -58,7 +55,6 @@ unset file
 
 
 fio_function() {
-#local disk_config #TODO add function for this
 local arg
 local args=(
 	--filename="${testfile}"
