@@ -1,0 +1,180 @@
+#!/bin/bash
+
+ZPOOL_NAME=testdrive
+RESULTS_DIR="/root/Results"
+
+SIZES=(50G)
+RUNTIMES=(180)
+
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+
+timestamp() { TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
+
+list_drives() {
+local filename="${RESULTS_DIR}"/lsblk."$(timestamp)".txt
+
+	{
+	echo "lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN"
+	echo ""
+	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN
+	} | tee "${filename}"
+}
+
+clear_cache() {
+echo 3 > /proc/sys/vm/drop_caches
+sleep 3
+}
+
+#######################################
+########    Load Devices     ##########
+#######################################
+
+for file in "${SCRIPT_DIR}/config/${1}/"*; do
+	source "${file}"
+done
+
+#######################################
+#######    Load Test Profile    #######
+#######################################
+
+source "${SCRIPT_DIR}/profiles/fio.benchmark.profile.${2}.sh"
+
+#######################################
+########  Function Libraries  #########
+#######################################
+
+for file in "${SCRIPT_DIR}"/lib/*; do
+	source "${file}"
+done
+unset file
+
+#######################################
+########   fio Functions 	###########
+#######################################
+
+
+
+fio_function() {
+local arg
+local args=(
+	--filename="${testfile}"
+	--bs="${blocksize}"
+	--iodepth="${iodepth}"
+	--ioengine="${ioengine}"
+	--rw="${test_type}"
+	--size="${size}"
+	--numjobs="${numjobs}"
+	--gtod_reduce="${gtod_reduce:-0}"
+	--group_reporting
+	--time_based
+#	--mem_align="${mem_align:=512b}"
+	--end_fsync=1
+	--direct="${direct}"
+	--runtime="${runtime}"
+# offset_increment is needed to avoid inflation of sequential reads
+#  when numjobs is high as the exact same spot will simultaneously be read
+#  the number of times that numjobs is set to
+#	--offset_increment=356M
+# Here, it was disabled as--really--there shouldn't be a job defined where
+#  jobs are greater than 1 for sequential reads, but if there are, this
+#  is a reminder to set something accordingly
+	--output-format=normal,json
+	)
+
+# Pareto principle states something like:
+#  20% of things happen 80% of places/situations and vice versa
+# Thanks to `https://csurbhi.github.io/fio-benchmark-random-writes/`
+#  for finding the pareto power of `0.9517` to get an 80/20 split
+if [[ "${use_pareto}" == "1" ]]; then
+	args+=( 
+		--norandommap=1
+		--random_distribution=pareto:0.9517
+		)
+fi
+
+# Similarly, we may presume that in mixed read/write environments
+#  that reads, being more common, will weigh to about 80% of instructions
+case "${test_type}" in
+	randrw|readwrite|rw)
+		args+=(--rwmixread=80)
+		rwmixread=80
+	;;
+	*)
+		unset rwmixread # Used for fio_output_name()
+	;;
+esac
+
+# By default, 'random' I/O types map out the test area such that no area gets
+#  repeated until all of the test area has been hit--just in random order
+# This turns that off so that 'random' is actually random--as one would
+#  presume by 'random' in the test name
+# This should only matter when direct=0 since only then should cache be
+#  involved
+# This code was included to only apply in situations relevant in order to
+#  not make it appear in irrelevant situations where its inclusion may cause
+#  some confusion
+if [[ "${direct}" == 0 ]]; then
+	case "${test_type}" in
+		randread|randwrite|randtrim|randrw|randtrimwrite)
+			args+=(--norandommap)
+		;;
+	esac
+fi
+
+fio_output_name
+args+=(--output="${output_name}".log)
+args+=(--name="fiotest")
+
+for arg in "${args[@]}"; do
+	echo "${arg}"
+done
+
+clear_cache
+fio "${args[@]}"
+}
+
+fio_output_name() {
+unset extra_info
+
+if [[ -n "${mem_align}" ]]; then
+	extra_info+=".mem_align-${mem_align}"
+fi
+if [[ "${use_pareto}" == "1" ]]; then
+	extra_info+=".pareto-0.9517"
+fi
+
+output_name="${results_dir}"/
+output_name+="${disk_config}"
+output_name+=".bs-${blocksize}"
+output_name+=".${ioengine}"
+output_name+=".direct-${direct}"
+output_name+=".${test_type}"
+output_name+="${rwmixread:+.rwmixread-${rwmixread}}"
+output_name+=".iodepth-${iodepth}"
+output_name+=".numjobs-${numjobs}"
+output_name+=".size-${size}"
+output_name+="${extra_info:+${extra_info}}"
+output_name+=".$(timestamp)"
+}
+
+
+#######################################
+##########       Main        ##########
+#######################################
+
+mkdir -p "${RESULTS_DIR}"
+
+# Prepare / Wipe Drives for either zfs or ext4 testing
+#  HWRAID testing already prepares itself, but without these,
+#  zfs and ext4 would error out.
+hwraid_clear_virtual_disks
+p /c0/e32/s"${HWRAID_LAYOUTS_ALL_SLOTS_COMBINED}" set jbod force
+
+# Save lsblk drive info to results folder
+list_drives
+
+# Add any combination of the following below comment:
+#  raw_disk_matrix
+#  zfs_disk_matrix
+#  hwraid_disk_matrix
+#  ext4_disk_matrix

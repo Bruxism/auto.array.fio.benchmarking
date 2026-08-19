@@ -15,10 +15,17 @@ DRIVES_RAW=(/dev/sd[a-m])
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 # Initialize block device test file locations
-BLOCK_DEVICE_TESTS=(${SCRIPT_DIR}/BlockTests/**/*.fio)
+BLOCK_DEVICE_TESTS=("${SCRIPT_DIR}"/BlockTests/**/*.fio)
 
 # Set results directory by time
 RESULTS_DIR="fio.results-$(date +%Y.%m.%d-%H.%M-UTC)"
+
+# Unmount/Export any zpool and wipe any filesystem
+clear_zfs_fs() {
+zpool export -a || true
+wipefs -af "${DRIVES_RAW[@]}"
+echo "All zpool exported and filesystem wiped from script-configured drives"
+}
 
 # Function for listing drive information and saving it
 list_drives () {
@@ -30,6 +37,7 @@ local filename="${RESULTS_DIR}/drive_info.txt"
 	lsblk -d -o PATH,SIZE,MODEL,SERIAL,WWN "${DRIVES_RAW[@]}"
 	} | tee "${filename}"
 }
+
 
 # Function for running fio tests
 # `--output` is used for the output log file
@@ -57,6 +65,7 @@ echo "Location of script: ${SCRIPT_DIR}"
 echo "Tests initialized: ${BLOCK_DEVICE_TESTS[@]}"
 mkdir "${RESULTS_DIR}"
 echo "Results Directory: ${RESULTS_DIR}"
+clear_zfs_fs
 list_drives
 fio_raw_tests
 }

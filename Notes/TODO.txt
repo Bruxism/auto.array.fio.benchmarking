@@ -1,0 +1,10 @@
+fio.ZFS.Ext4.hwRAID.TestSuite.sh
+	Flags for which kinds of tests to run
+	if-condition wiping virtual drives if they exist instead of just presuming
+
+lib/zfs
+	selectively export only the pools that drives being tested are assigned to
+
+lib/hwraid
+	Identify and track the specific virtual drive (v0)
+	  that is going to be wiped and used

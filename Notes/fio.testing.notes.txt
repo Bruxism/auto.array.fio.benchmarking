@@ -1,0 +1,47 @@
+"Real storage engineers—at least, the ones who are doing their jobs right—will first analyze the actual storage access patterns of a server or service, then write fio scripts to model those exact patterns."
+	https://arstechnica.com/gadgets/2020/02/how-fast-are-your-disks-find-out-the-open-source-way-with-fio/
+
+
+I've really been trying to set up these test to favor zfs
+	Partly because I know ARC is a huge improvement and direct=1 with primarycache=off||metadata put it as a huge disadvantage
+
+
+ZFS can't leverage iodepth with libaio while direct=1
+	https://github.com/openzfs/zfs/discussions/17032
+		https://github.com/openzfs/zfs/discussions/17032#discussioncomment-12083322
+			If I understood correctly, libaio relies on pagecache to stack iodepth, but since zfs doesn't use it, it can't leverage a stacked iodepth
+	Instead, it should be kept at 1 and use numjob instead
+	Direct=0 works fine
+
+Logbias=throughput is terrible unless you're using SLOG
+	https://www.reddit.com/r/zfs/comments/azt8sz/logbiasthroughput_without_a_slog/
+
+Setting multiple jobs with rw=read and direct=0 starts all jobs at the same place and basically just reads once from disk and then N-1 jobs from cache
+	solutions include:
+		--offset_increment=
+		--rw=randread:N
+			N is number of operations before jumping to another random read spot (blocksize * N sequential reads)
+	`--write_iolog=` helped me figure it out when I found absurdly inflated results--@~25GiB/s reads
+
+Tangentially related is when multiple jobs are run simultaneously with direct=0 and random read where, by default, random mapping is on, cache actually gets hits from the occasion that each job happens to read something the other had already cached
+	Random mapping is where any single job with randomness is set to not repeat any area until all others have been gone over
+	Each job has independent random mapping, so with it on--which it is by default--a single job wont get cache hits unless it already was in cache from a previous run or it's still in cache after having gone over 100% of the data and begun repeating
+	`--norandommap` can be used to make each request random, and that way, there's a chance for cache hits to happen before having read over 100% of the test size
+		Results with `--norandommap` between jobs=1 & iodepth=20 vs jobs=20 & iodepth=1 are similar or equal
+
+
+If ZFS and HWRAID are running at the same time with cache enabled, ZFS hogs up RAM leaving HWRAID at a disadvantage
+
+I had set a Pareto parameter for some testing--really for direct=0--to simulate realistic targeting for cache hits
+	'realistic' in the sense that Pareto principle states something like: 20% of things happen 80% of places/situations and vice versa
+	To get 80/20, the Pareto factor should be set to `0.9517`
+		Answer found thanks to here: https://csurbhi.github.io/fio-benchmark-random-writes/
+			Archive: https://web.archive.org/web/20260708230410/https://csurbhi.github.io/fio-benchmark-random-writes/
+
+I'm working on a profile tentatively called 'default', and I'm pretty much going with all io_uring with the exception of the latency profile since io_uring has the most compatibility
+	I chose iodepth=20 and numjobs=1 for the sequential tests since sequential tests with reads would suffer from stacked cache reads mentioned earlier since all of them would start at the same place
+		Controlling for sequential reads with numjobs greater than 1 with offset_increment seems contrived to me when I could use iodepth instead
+	For tests with randomization, I kept iodepth=20 and numjobs=1 for when pareto is enabled in order to respect the singular pareto distribution
+		On that note, I did still include direct=0 because ZFS is renowned for a more intelligent caching algo that would be unfair to exclude since it is practical in real life
+			When combined with Pareto, it ought to give it a significant advantage
+	I removed pareto from being included in the sequential tests since it isn't applicable to sequential tests

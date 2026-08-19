@@ -1,0 +1,106 @@
+drive=nvme0n1
+mkdir -p /root/Results
+
+zpool destroy testdrive
+testlocation4k=/testdrive/4k
+testlocation1M=/testdrive/1M
+umount /mnt/${drive}
+wipefs -af /dev/${drive}
+blkdiscard -f /dev/"${drive}"
+zpool create -o ashift=12 -o autotrim=off testdrive /dev/${drive}
+zfs create -o atime=off -o logbias=throughput -o checksum=off -o compression=lz4 -o primarycache=metadata -o xattr=sa -o recordsize=4k testdrive/4k
+zfs create -o atime=off -o logbias=throughput -o checksum=on -o compression=lz4 -o primarycache=metadata -o xattr=sa -o recordsize=1M testdrive/1M
+
+
+zpool destroy testdrive
+wipefs -af /dev/"${drive}"
+blkdiscard -f /dev/"${drive}"
+mkdir -p /mnt/${drive}
+testlocation=/mnt/"${drive}"
+parted --script /dev/"${drive}" mklabel gpt mkpart "" ext4 0% 100%
+mkfs.ext4 -F /dev/"${drive}" -E lazy_itable_init=0,lazy_journal_init=0
+mount -o noatime,nodiratime /dev/"${drive}" /mnt/"${drive}"
+
+umount /mnt/${drive}
+zpool destroy testdrive
+wipefs -af /dev/"${drive}"
+blkdiscard -f /dev/"${drive}"
+mkdir -p /mnt/${drive}
+testlocation4k=/mnt/"${drive}"
+parted --script /dev/"${drive}" mklabel gpt mkpart "" ext4 0% 100%
+mkfs.ext4 -F /dev/"${drive}"p1 -b 16384 -E lazy_itable_init=0,lazy_journal_init=0
+mount -o noatime,nodiratime /dev/"${drive}"p1 /mnt/"${drive}"
+
+umount /mnt/${drive}
+wipefs -af /dev/${drive}
+
+
+
+zpool iostat -v 1
+iostat -x 1
+zarcstat 1
+
+#Drop kernel cache
+echo 3 > /proc/sys/vm/drop_caches
+
+
+
+
+
+fio --name=1M-randread --directory=${testlocation1M}/ --bs=1M --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/1M.randread.ZFS.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+fio --name=4k-randread --directory=${testlocation4k}/ --bs=4k --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/4k.randread.ZFS.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+
+fio --name=1M-randread --directory=${testlocation4k}/ --bs=1M --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/1M.randread.ext4.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+fio --name=4k-randread --directory=${testlocation4k}/ --bs=4k --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/4k.randread.ext4.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+
+
+
+
+fio --name=16k-randread --directory=${testlocation4k}/ --bs=16k --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/16k.randread.ext4.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+
+
+zpool destroy testdrive
+testlocation4k=/testdrive/4k
+testlocation1M=/testdrive/1M
+umount /mnt/${drive}
+wipefs -af /dev/${drive}
+blkdiscard -f /dev/"${drive}"
+zpool create -o ashift=9 -o autotrim=off testdrive /dev/${drive}
+zfs create -o atime=off -o logbias=throughput -o checksum=off -o compression=lz4 -o primarycache=metadata -o xattr=sa -o recordsize=16k testdrive/4k
+
+
+fio --name=16k-randread --directory=${testlocation4k}/ --bs=16k --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=4 --rw=randread --size=256M --group_reporting --output="/root/Results/16k.randread.zfs.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fio --name=Sequential-Throughput --filename=/dev/sdf --bs=1M --iodepth=64 --end_fsync=1 --direct=1 --ioengine=libaio --runtime=300 --gtod_reduce=1 --time_based --numjobs=1 --rw=read --size=200G --group_reporting --output="/root/Results/1M.Sequential-Throughput.RAW.$(TZ='America/Chicago' date +%H.%M).txt" --output-format=normal,json
+
+
+
+
+./fio.ZFS.Ext4.hwRAID.TestSuite.sh PE.Single exhaustive
