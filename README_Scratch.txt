@@ -64,7 +64,7 @@ Regardless, I wanted to collect so many thousands results of so many variations.
 
 
 
-
+I recall some published tests showing kernel options, but I didn't fully recognize them. They may be significant or niche.
 
 
 
