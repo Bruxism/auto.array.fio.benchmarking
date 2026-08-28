@@ -20,13 +20,23 @@ ___
 
 One of the first challenges of setting up a server is designing configurations of arrays of disks. It's a critical first step that may be laborious to change if not impossible to preserve data of without access to an alternative and sufficient size of complimenting storage. It's important to get it right from the outset as it is foundational to the data which is built on it.
 
+For me, I wanted help to decide between hardware RAID (HWRAID) or OpenZFS. Glossing over online opinion, the consensus appeared to lean strongly towards OpenZFS, but there were comments about how HWRAID had better metrics--it simply lacked so many features such as snapshotting.
+
+Available information gave me limited information such as how RAID1 mirroring doubles read, but that write stays the same. However, things get complicated and information scarce when there's filesystem, blocksize, iodepth, numjobs, whether data is continuous, and so much more--combined. I wanted to see all of it.
+
+Therefore, I sought to comprehensively test so many combinations to look at the results, and then use that to decide which filesystem to use.
+
+### The Journey: the treasure is the knowledge we make along the way
+
 For a moment, let's set aside any particular configuration, and consider *how* to compare *what* differences in performance and the *why* those differences matter.
 
 The prominent method of testing is via `fio`, a benchmarking software made by an illustrious maintainer of the Linux Kernel and creator of an I/O API, `io_uring`, Jens Axboe.
 
-This software has a lot of options which we'll get to some of, but basically three measures of significance: bandwidth, input/output operations per second (IOPS), and latency.
+This software has a lot of options which we'll get to some of, but basically three measures of significance: *bandwidth*, input/output operations per second (*IOPS*), and *latency*.
 
 Those measures matter differently between different services such as those suited for graphic designers, financial institutions, or online gaming--for examples.
+
+I set out to understand how each of the options for configuring arrays and disks actually performed.
 
 #### The *what*: A *very* brief glossing of bandwidth, IOPS, latency, and redundancy
 
@@ -34,7 +44,7 @@ Those measures matter differently between different services such as those suite
   
   - Important for systems that are moving a lot of data such as for total system backups or video editing
 
-- IOPS is--not *really*, but practically--the amount of simultaneous requests that can be handled
+- IOPS is--not *exactly*, but practically--the amount of simultaneous requests that can be handled
   
   - Important for systems that are handling lots of different users--game servers, databases--or even a single user loading a lot of small files
 
@@ -44,19 +54,19 @@ Those measures matter differently between different services such as those suite
     
     - Redundant databases--in particular--are affected by even small differences in measures of latency as there are cumulative and compounding functions as a result of such differences
 
-These are just the fundamental performance metrics for storage units. Consider that multiple services may share devices. Flash-based storage is less affected versus hard-disk storage which is greatly affected.
-
-- Redundancy is the quality of having simultaneous copies of data such that a system can continue to function despite, in this context, disk failure
+- Redundancy is the quality of having simultaneous copies of data such that a system can continue to function despite disk failure
   
-  - Important for critical systems that must remain operational which, for example, can be measured in people's lives lost or millions of dollars per minute
+  - Important for critical systems that must remain operational which, in extremes, may be measured in people's lives lost or millions of dollars per minute
 
 #### The *why*: performance, cost efficiency, and minimizing risk
 
 There's a saying: "**Any idiot can build a bridge that stands, but it takes an engineer to build a bridge that barely stands**". One way to interpret that is that it takes an engineer to most *efficiently* make use of resources to design a solution that performs *sufficiently* even if narrowly skirting *risk*.
 
-For some demands, especially in business or military, the momentary loss of a service may be a catastrophe measured in lives or millions of dollars per minute.
+We can safely presume in most all cases that there is a limited budget.
 
-In '*what*' we also glossed over parts of the *why*. Basically, different tasks value different metrics differently, but there's another factor entirely: **redundancy**--a huge part of making sure data remains **available**; this means being able to survive and operate continuously despite drive failures.
+~~In '*what*' we also glossed over parts of the *why*. Basically, different tasks value different metrics differently, but there's another factor entirely: **redundancy**--a huge part of making sure data remains **available**; this means being able to survive and operate continuously despite drive failures.~~
+
+For some demands, especially in business or military, the momentary loss of a service may be a catastrophe measured in lives or millions of dollars per minute.
 
 ~~This is the intersection between business demands and technical application. Understanding and balancing business challenges with the design and application of technical resources means having to value different metrics differently.~~
 
