@@ -4,13 +4,13 @@ ___
 
 To automate the setup and teardown of customizable OpenZFS and HWRAID+ext4 arrays to run [fio](https://github.com/axboe/fio) benchmarks using customizable profiles of variables such as `blocksize` and `numjobs` to exhaustively and iteratively test every combination of on a bare system that was live-booted such as with [TinyLive](https://github.com/Bruxism/TinyLive).
 
-> [!WARNING]
-> HIGHLY DESTRUCTIVE TO ALL CONNECTED DRIVES REGARDLESS OF SETUP
+> [!CAUTION]
+> HIGHLY DESTRUCTIVE TO ALL DATA IN ALL CONNECTED DRIVES REGARDLESS OF SETUP
 
-# **Warning: HIGHLY DESTRUCTIVE TO ALL CONNECTED DRIVES REGARDLESS OF SETUP**
+# **Warning: HIGHLY DESTRUCTIVE TO ALL DATA IN ALL CONNECTED DRIVES REGARDLESS OF SETUP**
 
-> [!WARNING]
-> HIGHLY DESTRUCTIVE TO ALL CONNECTED DRIVES REGARDLESS OF SETUP
+> [!CAUTION]
+> HIGHLY DESTRUCTIVE TO ALL DATA IN ALL CONNECTED DRIVES REGARDLESS OF SETUP
 
 These scripts write over all disks and wipe their partition tables several times over throughout testing. Your data will be deleted. I'm not responsible for lost data. Only use this on systems with which you are okay to lose all data on all drives possibly including those not included in testing.
 
@@ -22,15 +22,31 @@ There are two main files needing configuration before running tests: those under
 
 
 
-`config/`
+Simply put: look at the examples in `config/`, make a another subdirectory there for your own system, and model it likewise for your own system. Then, go to the main script, and uncomment the tests that you'll be running. Finally, run the script appended with two arguments in order: the name of the subdirectory modeled for your system in `config/` and then the name of a test profile in `profiles/`.
 
-This is where you'll write out your own system's drive configurations to be tested. Examples are included, and it's necessary to use the included variable names; for example: `ZFS_DEVICES` and `ZFS_ZPOOL_LAYOUTS` in `zfs.config.sh`. The name of the config files themselves does not matter, and in practice, any name can be used and all of the configs for a given system's directory (`config/{yourSystemsDirectory}`) could be combined into one text file. What's important is that the names of the associative array variables for the tests to be run are included and unchanged, and that you include the device locations, ideally absolute paths by-id, e.g. `/dev/disk/by-id/wwn-0x{aBunchOfDigits}`.
+
+
+> [!TIP]
+> 
+> If you booted from TinyLive, then run tmux, press ctrl-b followed by ctrl-r to restore an included session of several panes of monitors including those for seeing [drive / ARC / zpool] use and an htop. Those monitors go to a second window, and you'll be left at a single pane window with waiting console. ctrl-b then ctrl-w opens a menu to switch between windows.
+
+
+
+`config/` 
+
+This is where you'll write out your own system's drive configurations to be tested in a directory that you create and name. That name will be used as the first argument for the main script.
+
+Examples are included, and it's necessary to use the included variable names for their given tests. For example: `ZFS_DEVICES` and `ZFS_ZPOOL_LAYOUTS` in `zfs.config.sh`. 
+
+The name of the config files themselves does not matter because every file in this directory is executed via `source`. What's important is that the names of the associative array variables for the tests to be run are included and unchanged, and that you include the device locations, ideally using absolute paths and by-id, e.g. `/dev/disk/by-id/wwn-0x{aBunchOfDigits}`.
 
 
 
 `profiles/`
 
-This is where the rough equivalent of job files are saved. A couple are included, but you may make your own. Every combination of the available variables will be tested, so be wary about adding more as the amount of tests grows exponentially.
+This is where the rough equivalent of job files are saved. A couple are included, but you may make your own. Every combination of the available variables will be tested, so be wary about adding more as the amount of tests grows exponentially. To create your own profile, either change the settings in the included files, or copy one and name the copy as `fio.benchmark.profile.{CHANGEME}.sh`. The main script's second argument runs `source` on the file with matching text in the `{CHANGEME}` section.
+
+Note that `iodepth` and `numjobs` are run as pairs with commas within a pair. Each pair is delimited by a space. For example: `iodepths_numjobs=(1,256 256,1 4,64 64,4)`; in that example, the first pair has `iodepth` as `1` and `numjobs` as `256`; the second pair has `iodepth` as `256` and `numjobs` as `1`; the third pair has `iodepth` as `4` and `numjobs` as `64`; and final and fourth pair has `iodepth` as `64`, and `numjobs` as `4`.
 
 
 
@@ -46,19 +62,33 @@ The bottom of this script has a list of commented functions--one for each type o
 
 - `ext4_disk_matrix` -- individual disks with ext4
 
-Remove the comments for the type of tests to be run, and run the script with the name of your personally created directory under `config/` as the first argument and the name of the profile in `profiles/` as the second argument.
+Remove the `#` preceding the text of the tests to be run, and then run the script with the name of your personally created directory under `config/` as the first argument and the name of the profile in `profiles/` as the second argument. For example: `./fio.ZFS.Ext4.hwRAID.TestSuite.sh PowerEdgeR730xd default`
 
-At the top of the script are some configurable variables that shouldn't *need* changing:
+At the top of the script are some configurable variables that shouldn't *need* changing, but optionally may be:
 
 - `ZPOOL_NAME` - The name of the zpool used during testing; by default: `testdrive`
 
 - `RESULTS_DIR` - The root directory of test results--by default: `/root/Results`. To clarify: I say 'root directory' not because it's in `/root/`, but because each time the script runs, it creates a child directory here that is named as the timestamp from whence it was run.
 
-- `SIZES` - The size(s) of the testfile(s). I included and tested only one size by default (`50G`), and while untested, it should work as a customizable list of sizes. To clarify: it should work fine with any single size--obviously, given that it can fit in all of the configurations.
+- `SIZES` - The size(s) of the test file(s). I included and tested only one size by default (`50G`), and while untested, it should work as a customizable list of sizes. To clarify: it should work fine with any single size--obviously, given that it can fit in all of the configurations.
 
 - `RUNTIMES` - Similarly to `SIZES`, a(n) (untested) customizable list of runtimes--by default and tested, just as one item, and in this case: `180` seconds per test.
 
 
+
+### Results
+
+By default, results are stored in `/root/Results`. There, a filename-timestamped `txt` of the output of `lsblk` is saved, and a set of subdirectories according to the tests that were run (e.g. `zfs`, `HWRAID`, and so on) contain the `txt` files of their results, respectively.
+
+Each test result file is timestamped and named by the options used to run it.
+
+> [!WARNING]
+> 
+> The names of the test files are long. In Windows, for example, they may not be able to be opened if they reside deep enough in a drive's path. You may have to enable long filenames and/or place them in the root of the drive.
+
+Such a naming scheme was used to be able to use conventional file search applications to filter for particular sets of results in order to open them with conventional text file applications and compare.
+
+Should you prefer to make a database or graphics of the results, the output of each of the test results are also saved as json data. Human-readable data is included in those same files at the end of them.
 
 ___
 
