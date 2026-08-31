@@ -16,6 +16,10 @@ These scripts write over all disks and wipe their partition tables several times
 
 ___
 
+### Requirements
+
+Linux, bash, fio, Dell's PERCCLI, OpenZFS, util-linux, coreutils, e2fsprogs
+
 ## How to use
 
 There are two main files needing configuration before running tests: those under `config/`, and the main script file itself, `fio.ZFS.Ext4.hwRAID.TestSuite.sh`. Test profiles in `profiles/` may also be created and customized.
@@ -63,6 +67,8 @@ At the top of the script are some configurable variables that shouldn't *need* c
 - `SIZES` - The size(s) of the test file(s). I included and tested only one size by default (`50G`), and while untested, it should work as a customizable list of sizes. To clarify: it should work fine with any single size--obviously, given that it can fit in all of the configurations.
 
 - `RUNTIMES` - Similarly to `SIZES`, a(n) (untested) customizable list of runtimes--by default and tested, just as one item, and in this case: `180` seconds per test.
+
+- `TIMEZONE` - Time zone in region/city format. Default: `America/Chicago`
 
 ### Results
 
@@ -154,26 +160,24 @@ In other words, this project facilitates running comprehensive testing in a '*pu
 
 To roughly make equivalent testing between OpenZFS and HWRAID, some liberties were taken in how they were configured.
 
-
-
 #### HWRAID
 
 Direct = 1 -- See: `lib/lib.fio.benchmark.MegaRAID.perccli.sh`
 
 ```
-		pdcache=on
-		writeback=wt
-		readahead=nora
-		cachedirect=direct
+        pdcache=on
+        writeback=wt
+        readahead=nora
+        cachedirect=direct
 ```
 
 Direct = 0
 
 ```
-		pdcache=off
-		writeback=wb
-		readahead=ra
-		cachedirect=cached
+        pdcache=off
+        writeback=wb
+        readahead=ra
+        cachedirect=cached
 ```
 
 #### OpenZFS
@@ -181,22 +185,18 @@ Direct = 0
 Direct = 1 -- See: `lib.fio.benchmark.zfs_functions.sh`
 
 ```
-		checksum=off
-		primarycache=metadata
+        checksum=off
+        primarycache=metadata
 ```
 
 Direct = 0
 
 ```
-		checksum=on
-		primarycache=all
+        checksum=on
+        primarycache=all
 ```
 
-
-
 ---
-
-
 
 I had understood the pros and cons of different RAID levels, but now, besides software and hardware RAID was OpenZFS.
 
