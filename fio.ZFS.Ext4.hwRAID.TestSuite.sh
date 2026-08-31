@@ -2,13 +2,14 @@
 
 ZPOOL_NAME=testdrive
 RESULTS_DIR="/root/Results"
+TIMEZONE="America/Chicago"
 
 SIZES=(50G)
 RUNTIMES=(180)
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
-timestamp() { TZ='America/Chicago' date +%Y.%m.%d-%H.%M; }
+timestamp() { TZ="${TIMEZONE}" date +%Y.%m.%d-%H.%M; }
 
 list_drives() {
 local filename="${RESULTS_DIR}"/lsblk."$(timestamp)".txt
