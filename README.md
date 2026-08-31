@@ -18,7 +18,9 @@ ___
 
 ### Requirements
 
-Linux, bash, fio, Dell's PERCCLI, OpenZFS, util-linux, coreutils, e2fsprogs
+Linux, bash, fio, Dell's PERCCLI, OpenZFS, util-linux, coreutils, & e2fsprogs.
+
+Tested using [TinyLive](https://github.com/Bruxism/TinyLive) which was built with Debian's `debootstrap`.
 
 ## How to use
 
@@ -37,6 +39,8 @@ This is where you'll write out your own system's drive configurations to be test
 Examples are included, and it's necessary to use the included variable names for their given tests. For example: `ZFS_DEVICES` and `ZFS_ZPOOL_LAYOUTS` in `zfs.config.sh`. 
 
 The name of the config files themselves does not matter because every file in this directory is executed via `source`. What's important is that the names of the associative array variables for the tests to be run are included and unchanged, and that you include the device locations, ideally using absolute paths and by-id, e.g. `/dev/disk/by-id/wwn-0x{aBunchOfDigits}`.
+
+See the examples in`config/examples/` for more details.
 
 `profiles/`
 
