@@ -10,6 +10,22 @@ declare -A ZFS_ZPOOL_LAYOUTS
 #	This is mostly for convenience
 # This is used to convert names in ZFS_ZPOOL_LAYOUTS and
 #	for wiping drives
+
+# `ZFS_DEVICES` and `ZFS_ZPOOL_LAYOUTS` must exist
+# The keys used in ZFS_DEVICES are arbitrary,
+#     and are only used in ZFS_ZPOOL_LAYOUTS
+#   This is to say that the keys aren't actually from
+#       anything named in the system
+#   I used sd{letter}, but it doesn't actually matter
+#       because it's from nothing and only for the convenience
+#       of writing ZFS_ZPOOL_LAYOUTS
+#   Their paired values are the paths to their drives, ideally,
+#       using an absolute by-id path
+# The keys used in ZFS_ZPOOL_LAYOUTS are for naming the results files
+#   Their values begin with the `ashift` and are followed by a configuration
+#       fashioned in the formatting of `zpool create` using the keys listed in
+#       ZFS_ZPOOL_LAYOUTS
+
 ZFS_DEVICES=(
 	[sda]="/dev/disk/by-id/wwn-0x5000cca04daec0b8"
 	[sdb]="/dev/disk/by-id/wwn-0x5000cca04db0abb8"
@@ -25,6 +41,7 @@ ZFS_DEVICES=(
 	[sdl]="/dev/disk/by-id/wwn-0x5000cca072836aa8"
 	[sdm]="/dev/disk/by-id/wwn-0x5000c5006259e7db"
 )
+
 ZFS_ZPOOL_LAYOUTS=(
 	[HDD_8STRIPE]="9 sde sdf sdg sdh sdi sdj sdk sdl"
 	[HDD_1STRIPE]="9 sdh"

@@ -4,7 +4,12 @@ declare -A HWRAID_LAYOUTS
 ############ HWRAID Config ############
 #######################################
 
-# First number is RAID number, and the following list is the slots used
+# `HWRAID_LAYOUTS` must exist
+#   The keys, for example, `HDD_8STRIPE`, is used to name the results files
+#       and the virtual drive, so you can use whatever you want limited by
+#       perccli64's naming conventions
+#   The values start with the RAID level, followed by a space, and then
+#       the slots of the drives each delimited by a comma
 
 HWRAID_LAYOUTS=(
 	[HDD_8STRIPE]="0 9,11,13,15,17,19,21,23"
@@ -18,4 +23,4 @@ HWRAID_LAYOUTS=(
 	[SSD_1STRIPE]="0 4"
 	[SSD_2x2RAID10]="10 0,2,4,7"
 	[SSD_4RAID5]="5 0,2,4,7"
- )
+)
