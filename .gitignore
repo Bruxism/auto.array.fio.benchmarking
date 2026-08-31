@@ -1,1 +1,3 @@
 Results/
+config/*
+!config/examples/
