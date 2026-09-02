@@ -1,3 +1,0 @@
-Name/use different folders for zfs and hwraid+ext4 output
-
-Logfiles for different parts of execution such as when a partition is made
