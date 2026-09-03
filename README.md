@@ -32,8 +32,6 @@ Simply put: look at the examples in [config/examples](config/examples), make ano
 > 
 > If you booted from TinyLive, then run tmux, press ctrl-b followed by ctrl-r to restore an included session of several panes of monitors including those for seeing [drive / ARC / zpool] use and an htop. Those monitors go to a second window, and you'll be left at a single pane window with waiting console. ctrl-b then ctrl-w opens a menu to switch between windows.
 
-
-
 `config/` 
 
 This is where you'll write out your own system's drive configurations to be tested in a directory that you create and name. That name will be used as the first argument for the main script.
@@ -44,8 +42,6 @@ The name of the config files themselves doesn't matter because every file in thi
 
 See the examples in [config/examples/](config/examples/) for more details.
 
-
-
 `profiles/`
 
 This is where the rough equivalent of job files are saved. A couple are included, but you may make your own. Every combination of the available variables will be tested, so be wary about adding more as the amount of tests grows exponentially. To create your own profile, either change the settings in the included files, or copy one and name the copy as `fio.benchmark.profile.{CHANGEME}.sh`. The main script's second argument needs to match the text in the `{CHANGEME}` section because the main script uses the second argument to look for that file in `profile/` and runs `source` on it.
@@ -53,8 +49,6 @@ This is where the rough equivalent of job files are saved. A couple are included
 Note that `iodepth` and `numjobs` are run as pairs with commas within a pair. Each pair is delimited by a space.
 
 - For example: `iodepths_numjobs=(1,256 256,1 4,64 64,4)`; in that example, the first pair has `iodepth` as `1` and `numjobs` as `256`; the second pair has `iodepth` as `256` and `numjobs` as `1`; the third pair has `iodepth` as `4` and `numjobs` as `64`; and final and fourth pair has `iodepth` as `64`, and `numjobs` as `4`.
-
-
 
 `fio.ZFS.Ext4.hwRAID.TestSuite.sh`
 
@@ -171,6 +165,10 @@ In other words, this project facilitates running comprehensive testing as an app
 ---
 
 ### Additional notes
+
+Some insights discovered during testing are noted [here](Notes/fio.testing.notes.txt).
+
+
 
 To roughly make equivalent testing between OpenZFS and HWRAID, some liberties were taken in how they were configured.
 
