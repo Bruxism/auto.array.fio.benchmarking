@@ -59,7 +59,7 @@ zfs destroy -r "${zpool_name}"
 }
 
 zfs_zpool_create() {
-zpool create \
+zpool create -f \
 -o ashift="${ashift}" \
 -o autotrim=on \
 -O relatime=on \
